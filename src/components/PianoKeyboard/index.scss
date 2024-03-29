@@ -1,0 +1,20 @@
+.pianoKeyboard {
+  .whiteKey {
+    &.disabled {
+      background: #ccc;
+    }
+    &.pressed {
+      background: #6aafff;
+      color: #fff;
+    }
+  }
+  .blackKey {
+    &.disabled {
+      background: #666;
+    }
+    &.pressed {
+      background: #095ab7;
+      color: #fff;
+    }
+  }
+}

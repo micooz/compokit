@@ -1,0 +1,32 @@
+.chordTable {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  table {
+    width: 100%;
+    border: 1px solid #eee;
+    background: #fff;
+  }
+  thead {
+    background-color: #f6f6f6;
+  }
+  thead tr th {
+    text-align: left;
+  }
+  tr th,
+  td {
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+    white-space: nowrap;
+  }
+  tr th {
+    padding: 4px 8px;
+  }
+  tr td:first-child {
+    padding: 4px 8px;
+  }
+
+  .p-card-content {
+    padding-top: 0;
+  }
+}

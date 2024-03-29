@@ -6,8 +6,10 @@ export type Progression = {
 };
 
 export type ChordItem = {
-  id: number;
   chord: Chord;
+  inversion: number;
   omits: NoteArray;
+  octave: 0 | 8 | -8;
   playing: boolean;
+  replacing: boolean;
 };

@@ -1,11 +1,11 @@
 export type GlobalConfig = {
   multiSelect: boolean;
-  showAssociatedNotes: boolean;
+  showRelatedNotes: boolean;
 };
 
 export const defaultGlobalConfig: GlobalConfig = {
   multiSelect: true,
-  showAssociatedNotes: true,
+  showRelatedNotes: true,
 };
 
 export const storagePrefix = "compokit";

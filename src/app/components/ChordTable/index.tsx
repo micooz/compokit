@@ -1,6 +1,5 @@
 "use client";
 import React, { useMemo, useRef } from "react";
-import { useReactive } from "ahooks";
 import { Card } from "primereact/card";
 
 import { Chord, ChordTypeEnum, Mode, ModeEnum } from "@/lib";
@@ -22,11 +21,6 @@ export interface ChordTableProps {
 
 export function ChordTable(props: ChordTableProps) {
   const { keyNote, mode, onRemove } = props;
-
-  const state = useReactive({
-    searchNote: "",
-  });
-
 
   const pianoRef = useRef<PianoKeyboardRef>(null);
 
@@ -101,7 +95,7 @@ export function ChordTable(props: ChordTableProps) {
                   {name}
                 </TextBeauty>
                 <i
-                  className="relative top-[0.1rem] pi pi-play cursor-pointer"
+                  className="pi pi-play cursor-pointer"
                   style={{ fontSize: "0.8rem" }}
                   onClick={onPlayScale}
                 />
@@ -129,14 +123,16 @@ export function ChordTable(props: ChordTableProps) {
     const { chord } = props;
 
     const abbr = chord.toAbbr({ transformAccidental: true });
-    const notes = chord.notes();
+    const notes = useMemo(
+      () => chord.notes().withGroup(3).names({ transformAccidental: false }),
+      [chord]
+    );
 
     return (
       <PercussionPad
         className="px-2 py-1 flex items-center justify-between"
-        notes={notes.names()}
+        notes={notes}
         pianoRef={pianoRef}
-        autoGroup
       >
         <div className="inline-block px-1 border border-transparent">
           <TextBeauty>{abbr}</TextBeauty>

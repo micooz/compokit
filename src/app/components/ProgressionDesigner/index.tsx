@@ -13,7 +13,7 @@ import { storage } from "@/utils/storage";
 import { sleep } from "@/utils/common";
 import { PianoKeyboard, PianoKeyboardRef } from "@/components/PianoKeyboard";
 import { ProgressionItem } from "../ProgressionItem";
-import { Progression } from "./share";
+import { ChordItem, Progression } from "./share";
 
 import "./index.scss";
 
@@ -38,7 +38,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
   const currentProgression = state.list[state.current];
 
-  ee.useEvent("ADD_CHORD", onAddChord);
+  ee.useEvent("ADD_CHORD", onAddOrReplaceChord);
 
   function save() {
     storage.progressions = state.list.map((item) => ({
@@ -59,15 +59,31 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     state.list = progressions.map((item) => ({
       ...item,
       chords: item.chords.map((it) => ({
-        ...it,
-        omits: NoteArray.from(it.omits),
         chord: new Chord(it.chord),
+        inversion: it.inversion || 0,
+        omits: NoteArray.from(it.omits),
+        octave: it.octave || 0,
         playing: false,
+        replacing: false,
       })),
     }));
 
     state.current = storage.activeProgressionIndex || 0;
     state.loaded = true;
+  }
+
+  async function playChord(chord: ChordItem, duration = 600) {
+    if (!pianoRef.current) {
+      return;
+    }
+
+    const notes = chord.chord
+      .inversion(chord.inversion)
+      .notes()
+      .withGroup(3, { omits: chord.omits, octave: chord.octave })
+      .names({ transformAccidental: false });
+
+    await pianoRef.current.attackRelease(notes, duration);
   }
 
   // events for <ProgressionList />
@@ -77,11 +93,17 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
   }
 
   function onTabChange(index: number) {
+    if (state.isPlaying.status) {
+      return;
+    }
     state.current = index;
     storage.activeProgressionIndex = index;
   }
 
   function onAddProgression() {
+    if (state.isPlaying.status) {
+      return;
+    }
     state.list.push({
       name: `Progression ${state.list.length + 1}`,
       chords: [],
@@ -98,7 +120,13 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
   // events for <ProgressionItem />
 
-  function onChangeName(progression: Progression) {
+  function onChangeName(index: number) {
+    if (state.isPlaying.status) {
+      return;
+    }
+
+    const progression = state.list[index];
+
     let name = progression.name;
 
     confirmDialog({
@@ -121,29 +149,21 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     });
   }
 
-  async function onPlay(progression: Progression) {
+  async function onPlay(index: number) {
     if (state.isPlaying.status) {
       return;
     }
 
+    const progression = state.list[index];
+
+    state.current = index;
     state.isPlaying = { status: true, progression };
 
-    for (const item of progression.chords) {
-      const keys = item.chord
-        .notes()
-        .omit(item.omits, { checkAccidental: true })
-        .withGroup(3)
-        .names({ transformAccidental: false });
+    for (const chord of progression.chords) {
+      chord.playing = true;
+      await playChord(chord, 1000);
 
-      pianoRef.current?.attack(keys);
-      item.playing = true;
-
-      await sleep(940);
-      pianoRef.current?.release();
-      item.playing = false;
-
-      // wait a little bit for the voice to sound cleaner.
-      await sleep(60);
+      chord.playing = false;
 
       // set by onPause()
       if (state.isPlaying.status === false) {
@@ -159,19 +179,33 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     state.isPlaying = { status: false, progression: null };
   }
 
-  function onAddChord(chord: Chord) {
-    const progression = state.list[state.current];
+  function onAddOrReplaceChord(chord: Chord) {
+    const currentProgression = state.list[state.current];
 
-    if (!progression) {
+    if (!currentProgression) {
       return;
     }
 
-    progression.chords.push({
-      id: progression.chords.length,
+    const newChord: ChordItem = {
       chord,
+      inversion: 0,
       omits: NoteArray.from([]),
+      octave: 0,
       playing: false,
-    });
+      replacing: false,
+    };
+
+    const replacingChordIndex = currentProgression.chords.findIndex(
+      (item) => item.replacing
+    );
+
+    if (replacingChordIndex > -1) {
+      newChord.replacing = true;
+      currentProgression.chords[replacingChordIndex] = newChord;
+      playChord(newChord);
+    } else {
+      currentProgression.chords.push(newChord);
+    }
 
     save();
   }
@@ -182,30 +216,35 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
   }
 
   function onInvertChord(index: number) {
-    const item = currentProgression.chords[index];
+    const chord = currentProgression.chords[index];
 
-    if (!item) {
+    if (!chord) {
       return;
     }
 
-    currentProgression.chords[index] = {
-      id: item.id,
-      chord: item.chord.inversion(1),
-      omits: item.omits,
+    const newChord: ChordItem = {
+      chord: chord.chord,
+      omits: chord.omits,
+      inversion: (chord.inversion + 1) % chord.chord.notes().count(),
+      octave: chord.octave,
       playing: false,
+      replacing: chord.replacing,
     };
 
+    currentProgression.chords[index] = newChord;
+
+    playChord(newChord);
     save();
   }
 
   function onToggleOmitNote(index: number, note: Note, omit: boolean) {
-    const item = currentProgression.chords[index];
+    const chord = currentProgression.chords[index];
 
-    if (!item) {
+    if (!chord) {
       return;
     }
 
-    let newOmits = [...item.omits.valueOf()];
+    let newOmits = [...chord.omits.valueOf()];
 
     if (omit) {
       newOmits.push(note);
@@ -213,18 +252,43 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       newOmits = newOmits.filter((it) => !it.is(note));
     }
 
-    if (newOmits.length === item.chord.notes().count()) {
+    if (newOmits.length === chord.chord.notes().count()) {
       return;
     }
 
-    item.omits = NoteArray.from(newOmits);
+    chord.omits = NoteArray.from(newOmits);
+
+    playChord(chord);
     save();
   }
 
-  // function onSortChords(chords: ChordItem[]) {
-  //   currentProgression.chords = chords;
-  //   save();
-  // }
+  function onToggleOctaveChord(index: number, octave: 0 | 8 | -8) {
+    const chord = currentProgression.chords[index];
+
+    if (!chord) {
+      return;
+    }
+
+    chord.octave = chord.octave === octave ? 0 : octave;
+    playChord(chord);
+  }
+
+  function onToggleReplaceChord(index: number, replace: boolean) {
+    const chord = currentProgression.chords[index];
+
+    if (!chord) {
+      return;
+    }
+
+    // reset all replace checkbox
+    state.list.forEach((progression) => {
+      progression.chords.forEach((chord) => {
+        chord.replacing = false;
+      });
+    });
+
+    chord.replacing = replace;
+  }
 
   return (
     <StickyBox
@@ -265,18 +329,19 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
             key={index}
             className="flex items-center"
             header={
-              <div
-                className="flex justify-between items-center select-none"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className="flex justify-between items-center select-none">
                 <div className="flex items-center gap-2">
                   {/* title */}
                   <span
                     className="text-sm cursor-text"
-                    onClick={() => onChangeName(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChangeName(index);
+                    }}
                   >
                     {item.name}
                   </span>
+
                   {/* play icon */}
                   {(state.isPlaying.status === false ||
                     state.isPlaying.progression?.name === item.name) && (
@@ -289,8 +354,10 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
                         }
                       )}
                       style={{ fontSize: "0.8rem" }}
-                      onClick={() => {
-                        state.isPlaying.status ? onPause() : onPlay(item);
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        state.isPlaying.status ? onPause() : onPlay(index);
                       }}
                     />
                   )}
@@ -301,7 +368,10 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
                   <i
                     className="pi pi-trash p-1 cursor-pointer hover:bg-gray-300 active:bg-gray-400"
                     style={{ fontSize: "0.8rem" }}
-                    onClick={() => onRemoveProgression(index)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveProgression(index);
+                    }}
                   />
                 )}
               </div>
@@ -312,10 +382,11 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
               chords={item.chords}
               pianoRef={pianoRef}
               disabled={state.isPlaying.status}
-              onInvert={onInvertChord}
-              onOmitNote={onToggleOmitNote}
-              onRemove={onRemoveChord}
-              // onSort={onSortChords}
+              onInvertChord={onInvertChord}
+              onToggleOmitNote={onToggleOmitNote}
+              onToggleOctaveChord={onToggleOctaveChord}
+              onToggleReplaceChord={onToggleReplaceChord}
+              onRemoveChord={onRemoveChord}
             />
           </AccordionTab>
         ))}

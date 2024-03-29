@@ -1,13 +1,12 @@
 "use client";
-import React, { useEffect, useImperativeHandle, useMemo, useRef } from "react";
+import React, { useImperativeHandle, useRef } from "react";
 import { useReactive } from "ahooks";
 
-import { NoteArray, NoteEnum } from "@/lib";
 import { PianoKeyboardRef } from "../PianoKeyboard";
 import { TouchEvent } from "../TouchEvent";
 
 export interface PercussionPadRef {
-  highlight: () => void;
+  // highlight: () => void;
 }
 
 export interface PercussionPadProps {
@@ -15,8 +14,6 @@ export interface PercussionPadProps {
   pianoRef: React.RefObject<PianoKeyboardRef>;
   disabled?: boolean;
   notes: string[];
-  omits?: string[];
-  autoGroup?: boolean;
   active?: boolean;
   activeBgColor?: string;
   activeFgColor?: string;
@@ -32,8 +29,6 @@ export const PercussionPad = React.forwardRef<
     pianoRef,
     disabled,
     notes,
-    omits = [],
-    autoGroup = false,
     active = false,
     activeBgColor = "#3a7bd0",
     activeFgColor = "#ffffff",
@@ -52,51 +47,22 @@ export const PercussionPad = React.forwardRef<
   //   }
   // }, [active]);
 
-  const notesWithGroup = useMemo(() => {
-    let arr = NoteArray.from(notes);
-    let group = 3;
-
-    if (autoGroup) {
-      const first = arr.get(0);
-      const size = arr.valueOf().length;
-
-      // triad
-      if (size <= 3 && first.index <= NoteEnum.E) {
-        group = 4;
-      }
-      // seventh
-      if (size <= 4 && first.index === NoteEnum.C) {
-        group = 4;
-      }
-    }
-
-    arr = arr.withGroup(group);
-
-    if (omits.length > 0) {
-      arr = arr.omit(NoteArray.from(omits), {
-        checkAccidental: true,
-      });
-    }
-
-    return arr.names({ transformAccidental: false });
-  }, [notes, omits, autoGroup]);
-
   useImperativeHandle(ref, () => ({
-    highlight,
+    // highlight,
   }));
 
   function highlight() {
     if (disabled) {
       return;
     }
-    pianoRef.current?.highlight(notesWithGroup);
+    pianoRef.current?.highlight(notes);
   }
 
   function onAttack() {
     if (disabled) {
       return;
     }
-    pianoRef.current?.attack(notesWithGroup);
+    pianoRef.current?.attack(notes);
     state.pressed = true;
   }
 

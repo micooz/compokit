@@ -27,6 +27,7 @@ export interface PianoKeyboardProps {
 export interface PianoKeyboardRef {
   highlight: (keys: string[]) => void;
   attack: (keys: string[]) => Promise<void>;
+  attackRelease: (keys: string[], duration: number) => Promise<void>;
   release: () => Promise<void>;
   play: (mode: "loop-once", keys: string[]) => Promise<void>;
   isPlaying: () => boolean;
@@ -73,6 +74,7 @@ export const PianoKeyboard = React.forwardRef<
   useImperativeHandle(ref, () => ({
     highlight,
     attack,
+    attackRelease,
     release,
     play,
     isPlaying,
@@ -93,6 +95,20 @@ export const PianoKeyboard = React.forwardRef<
     }
     await toneUtil.triggerAttack(keys);
     state.highlightNotes = keys;
+  }
+
+  async function attackRelease(keys: string[], duration: number) {
+    if (pianoPlayingRef.current) {
+      return;
+    }
+    await toneUtil.triggerAttackRelease(keys, duration / 1000);
+    state.highlightNotes = keys;
+
+    await sleep(duration);
+
+    if (clearHighlightAfterRelease) {
+      state.highlightNotes = [];
+    }
   }
 
   async function release() {
@@ -182,7 +198,7 @@ export const PianoKeyboard = React.forwardRef<
 
     return (
       <div className="mb-1 text-sm">
-        Active Notes:&nbsp;
+        Notes:&nbsp;
         {notes.length > 0 ? <TextBeauty>{hint}</TextBeauty> : "<none>"}
       </div>
     );

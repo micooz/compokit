@@ -1,4 +1,9 @@
 export type ProgressionItem = {
   name: string;
-  chords: { id: number; chord: string[]; omits: string[] }[];
+  chords: {
+    chord: string[];
+    inversion: number;
+    omits: string[];
+    octave: 0 | 8 | -8;
+  }[];
 };

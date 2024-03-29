@@ -1,4 +1,5 @@
-import { Note, NoteArray, NoteToNameOptions, Notes } from "./note";
+import { Note, NoteToNameOptions, Notes } from "./note";
+import { NoteArray } from "./note-array";
 
 export enum ChordTypeEnum {
   Triad,
@@ -81,7 +82,7 @@ export class Chord {
 
   // TODO: fromAbbr
   fromAbbr(abbr: string) {
-    // TODO
+    //
   }
 
   inversion(ordinal = 1) {

@@ -1,13 +1,8 @@
 import { Chord, ChordTypeEnum } from "./chord";
 import { transformObject } from "./common";
 import { Inter, Interval } from "./interval";
-import {
-  AccidentalEnum,
-  Note,
-  NoteArray,
-  NoteToNameOptions,
-  NoteType,
-} from "./note";
+import { AccidentalEnum, Note, NoteToNameOptions, NoteType } from "./note";
+import { NoteArray } from "./note-array";
 
 export enum ModeEnum {
   NaturalMajor,

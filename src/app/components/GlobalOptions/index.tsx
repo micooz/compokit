@@ -43,12 +43,12 @@ export function GlobalOptions(props: GlobalOptionsProps) {
     storage.globalConfig = state.config;
   }
 
-  function onToggleAssociatedNotes(e: CheckboxChangeEvent) {
+  function onToggleRelatedNotes(e: CheckboxChangeEvent) {
     const checked = e.checked ?? false;
-    state.config.showAssociatedNotes = checked;
+    state.config.showRelatedNotes = checked;
     storage.globalConfig = state.config;
 
-    ee.emit("TOGGLE_SHOW_ASSOCIATED_NOTES", checked);
+    ee.emit("TOGGLE_SHOW_RELATED_NOTES", checked);
     refresh();
   }
 
@@ -115,15 +115,15 @@ export function GlobalOptions(props: GlobalOptionsProps) {
 
       <div className="flex items-center">
         <Checkbox
-          inputId="showAssociatedNotes"
-          onChange={onToggleAssociatedNotes}
-          checked={state.config.showAssociatedNotes}
+          inputId="showRelatedNotes"
+          onChange={onToggleRelatedNotes}
+          checked={state.config.showRelatedNotes}
         />
         <label
-          htmlFor="showAssociatedNotes"
+          htmlFor="showRelatedNotes"
           className="text-xs ml-2 whitespace-nowrap"
         >
-          Show Associated Notes
+          Show Related Notes
         </label>
       </div>
 

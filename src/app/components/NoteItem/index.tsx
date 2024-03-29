@@ -17,7 +17,7 @@ export function NoteItem(props: NoteItemProps) {
 
   const state = useReactive({
     highlight: "none" as "light" | "normal" | "dark" | "none",
-    showAssociatedNotes: defaultGlobalConfig.showAssociatedNotes,
+    showRelatedNotes: defaultGlobalConfig.showRelatedNotes,
   });
 
   ee.useEvent("SEARCH_NOTE", (keywords) => {
@@ -31,7 +31,7 @@ export function NoteItem(props: NoteItemProps) {
     let match = false;
 
     for (const item of notes) {
-      if (state.showAssociatedNotes) {
+      if (state.showRelatedNotes) {
         const from = Note.from(item);
         const to = Note.from(note);
 
@@ -54,8 +54,8 @@ export function NoteItem(props: NoteItemProps) {
     }
   });
 
-  ee.useEvent("TOGGLE_SHOW_ASSOCIATED_NOTES", (show) => {
-    state.showAssociatedNotes = show;
+  ee.useEvent("TOGGLE_SHOW_RELATED_NOTES", (show) => {
+    state.showRelatedNotes = show;
   });
 
   function onSelect() {

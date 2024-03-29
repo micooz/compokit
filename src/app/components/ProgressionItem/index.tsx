@@ -78,12 +78,10 @@ function Chord(props: ChordProps) {
 
   return (
     <div
-      className={classNames(
-        "flex flex-col gap-2 border-2 border-transparent p-3",
-        {
-          "border-2 border-orange-300 bg-orange-50": item.replacing,
-        }
-      )}
+      className={classNames("flex flex-col gap-2 border-2 p-3", {
+        "border-transparent": !item.replacing,
+        "border-orange-300 bg-orange-50": item.replacing,
+      })}
     >
       <PercussionPad
         className="relative flex flex-col items-center p-2 border cursor-pointer hover:bg-gray-100"

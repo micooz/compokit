@@ -56,11 +56,16 @@ export function ChordTable(props: ChordTableProps) {
 
   // methods
 
-  function onPlayScale() {
+  async function onPlayScale() {
     if (!pianoRef.current) {
       return;
     }
-    pianoRef.current.play("loop-once", modeKeys);
+
+    await pianoRef.current.attackOneByOne([...modeKeys], 200);
+
+    const reversedModeKeys = [...modeKeys].reverse();
+    reversedModeKeys.shift();
+    await pianoRef.current.attackOneByOne(reversedModeKeys, 200);
   }
 
   function onAddChord(chord: Chord) {

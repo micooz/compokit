@@ -30,7 +30,7 @@ export const PercussionPad = React.forwardRef<
     disabled,
     notes,
     active = false,
-    activeBgColor = "#3a7bd0",
+    activeBgColor = "#3576cb",
     activeFgColor = "#ffffff",
     children,
   } = props;
@@ -51,11 +51,11 @@ export const PercussionPad = React.forwardRef<
     // highlight,
   }));
 
-  function highlight() {
+  function onMouseEnter() {
     if (disabled) {
       return;
     }
-    pianoRef.current?.highlight(notes);
+    pianoRef.current?.mouseHover(notes);
   }
 
   function onAttack() {
@@ -71,6 +71,7 @@ export const PercussionPad = React.forwardRef<
       return;
     }
     pianoRef.current?.release();
+    pianoRef.current?.mouseLeave();
     state.pressed = false;
   }
 
@@ -82,7 +83,7 @@ export const PercussionPad = React.forwardRef<
           background: state.pressed || active ? activeBgColor : undefined,
           color: state.pressed || active ? activeFgColor : undefined,
         }}
-        onMouseEnter={highlight}
+        onMouseEnter={onMouseEnter}
         onTouchStart={onAttack}
         onTouchEnd={onRelease}
         onMouseLeave={onRelease}

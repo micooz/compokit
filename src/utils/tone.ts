@@ -36,13 +36,17 @@ const samples = {
 };
 
 class ToneUtil {
-  private static loadingTask: Promise<Sampler>;
+  private static loadingTask?: Promise<Sampler>;
 
   private sampler?: Sampler;
 
   async init() {
     if (!ToneUtil.loadingTask) {
       ToneUtil.loadingTask = this.load();
+
+      ToneUtil.loadingTask.finally(() => {
+        ToneUtil.loadingTask = undefined;
+      });
     }
     this.sampler = await ToneUtil.loadingTask;
   }
@@ -83,7 +87,7 @@ class ToneUtil {
     return new Promise<Sampler>((resolve, reject) => {
       const sampler = new Sampler(samples, {
         release: 1,
-        baseUrl: '/audio/salamander/',
+        baseUrl: "/audio/salamander/",
         onload() {
           resolve(sampler.toDestination());
         },

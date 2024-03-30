@@ -19,17 +19,17 @@ export interface PianoKeyboardProps {
   endNote?: string;
   showLabelFor?: ("c" | "blacks" | "whites")[];
   showHighlightNotesHint?: boolean;
-  clearHighlightAfterRelease?: boolean;
   enabledKeys?: string[];
   dottedNotes?: string[];
 }
 
 export interface PianoKeyboardRef {
-  highlight: (keys: string[]) => void;
+  mouseHover: (keys: string[]) => void;
+  mouseLeave: () => void;
   attack: (keys: string[]) => Promise<void>;
   attackRelease: (keys: string[], duration: number) => Promise<void>;
+  attackOneByOne: (keys: string[], interval: number) => Promise<void>;
   release: () => Promise<void>;
-  play: (mode: "loop-once", keys: string[]) => Promise<void>;
   isPlaying: () => boolean;
 }
 
@@ -43,16 +43,18 @@ export const PianoKeyboard = React.forwardRef<
     endNote = "B5",
     showLabelFor = ["c"],
     showHighlightNotesHint = false,
-    clearHighlightAfterRelease = false,
     enabledKeys = [],
     dottedNotes = [],
   } = props;
 
   const boxRef = useRef<HTMLDivElement>(null);
   const pianoPlayingRef = useRef(false);
+  const lastPlayedNotesRef = useRef<string[]>([]);
 
   const state = useReactive({
-    highlightNotes: [] as string[],
+    hoverNotes: [] as string[],
+    playingNotes: [] as string[],
+    lastPlayedNotes: [] as string[],
   });
 
   const collection = useMemo(
@@ -72,21 +74,23 @@ export const PianoKeyboard = React.forwardRef<
   }, [dottedNotes]);
 
   useImperativeHandle(ref, () => ({
-    highlight,
+    mouseHover,
+    mouseLeave,
     attack,
     attackRelease,
+    attackOneByOne,
     release,
-    play,
     isPlaying,
   }));
 
   // methods
 
-  function highlight(keys: string[]) {
-    if (pianoPlayingRef.current) {
-      return;
-    }
-    state.highlightNotes = keys;
+  function mouseHover(keys: string[]) {
+    state.hoverNotes = keys;
+  }
+
+  function mouseLeave() {
+    state.hoverNotes = [];
   }
 
   async function attack(keys: string[]) {
@@ -94,7 +98,8 @@ export const PianoKeyboard = React.forwardRef<
       return;
     }
     await toneUtil.triggerAttack(keys);
-    state.highlightNotes = keys;
+    state.playingNotes = keys;
+    lastPlayedNotesRef.current = keys;
   }
 
   async function attackRelease(keys: string[], duration: number) {
@@ -102,13 +107,30 @@ export const PianoKeyboard = React.forwardRef<
       return;
     }
     await toneUtil.triggerAttackRelease(keys, duration / 1000);
-    state.highlightNotes = keys;
+    state.playingNotes = keys;
+    lastPlayedNotesRef.current = keys;
 
     await sleep(duration);
+    state.lastPlayedNotes = lastPlayedNotesRef.current;
+    state.playingNotes = [];
+  }
 
-    if (clearHighlightAfterRelease) {
-      state.highlightNotes = [];
+  async function attackOneByOne(keys: string[], interval: number) {
+    if (pianoPlayingRef.current) {
+      return;
     }
+
+    pianoPlayingRef.current = true;
+    state.lastPlayedNotes = [];
+
+    for (const note of keys) {
+      toneUtil.triggerAttackRelease(note, interval / 1000);
+      state.playingNotes = [note];
+      await sleep(interval);
+    }
+
+    state.playingNotes = [];
+    pianoPlayingRef.current = false;
   }
 
   async function release() {
@@ -117,45 +139,12 @@ export const PianoKeyboard = React.forwardRef<
     }
     await toneUtil.releaseAll();
 
-    if (clearHighlightAfterRelease) {
-      state.highlightNotes = [];
-    }
+    state.lastPlayedNotes = lastPlayedNotesRef.current;
+    state.playingNotes = [];
   }
 
   function isPlaying() {
     return pianoPlayingRef.current;
-  }
-
-  async function play(mode: "loop-once", keys: string[]) {
-    if (mode === "loop-once") {
-      await playOneByOne([...keys]);
-
-      const reverse = [...keys].reverse();
-      reverse.shift();
-      await playOneByOne(reverse);
-      return;
-    }
-
-    // if (mode === "simultaneously") {
-    //   await playTogether(keys);
-    // }
-  }
-
-  async function playOneByOne(keys: string[]) {
-    if (pianoPlayingRef.current) {
-      return;
-    }
-
-    pianoPlayingRef.current = true;
-
-    for (const note of keys) {
-      toneUtil.triggerAttackRelease(note, 0.2);
-      state.highlightNotes = [note];
-      await sleep(200);
-    }
-
-    state.highlightNotes = [];
-    pianoPlayingRef.current = false;
   }
 
   // events
@@ -191,7 +180,7 @@ export const PianoKeyboard = React.forwardRef<
   // components
 
   function HighlightHint() {
-    const notes = state.highlightNotes.map((note) => Note.from(note));
+    const notes = state.playingNotes.map((note) => Note.from(note));
     const hint = notes
       .map((note) => note.nameWithGroup({ transformAccidental: true }))
       .join(", ");
@@ -221,7 +210,11 @@ export const PianoKeyboard = React.forwardRef<
       key.is(note, { checkAccidental: true })
     );
 
-    const pressed = state.highlightNotes.includes(note.nameWithGroup());
+    const noteWithGroup = note.nameWithGroup();
+
+    const playing = state.playingNotes.includes(noteWithGroup);
+    const hover = state.hoverNotes.includes(noteWithGroup);
+    const dim = state.lastPlayedNotes.includes(noteWithGroup);
 
     const dotted = dottedKeys.find((key) =>
       key.is(note, { checkAccidental: true })
@@ -248,9 +241,10 @@ export const PianoKeyboard = React.forwardRef<
           "relative",
           "flex items-end flex-1 border-[2px] border-black -ml-[2px]",
           "text-black bg-white",
-          "shadow-[inset_0_0_4px_2px_#ddd]",
           disabled && "disabled",
-          pressed && "pressed"
+          playing && "playing",
+          hover && "hover",
+          dim && "dim"
         )}
         onTouchStart={() => {
           if (disabled) {
@@ -284,9 +278,20 @@ export const PianoKeyboard = React.forwardRef<
         key.is(nextB, { checkAccidental: true })
     );
 
-    const pressed =
-      state.highlightNotes.includes(nextA.nameWithGroup()) ||
-      state.highlightNotes.includes(nextB.nameWithGroup());
+    const nextAWithGroup = nextA.nameWithGroup();
+    const nextBWithGroup = nextB.nameWithGroup();
+
+    const playing =
+      state.playingNotes.includes(nextAWithGroup) ||
+      state.playingNotes.includes(nextBWithGroup);
+
+    const hover =
+      state.hoverNotes.includes(nextAWithGroup) ||
+      state.hoverNotes.includes(nextBWithGroup);
+
+    const dim =
+      state.lastPlayedNotes.includes(nextAWithGroup) ||
+      state.lastPlayedNotes.includes(nextBWithGroup);
 
     const dotted = dottedKeys.find(
       (key) =>
@@ -308,9 +313,10 @@ export const PianoKeyboard = React.forwardRef<
           "flex items-end justify-center flex-1",
           "bg-black text-white",
           "rounded-bl-[4px] rounded-br-[4px]",
-          "shadow-[0_2px_4px_2px_rgba(221,221,221,0.5)]",
           disabled && "disabled",
-          pressed && "pressed"
+          playing && "playing",
+          hover && "hover",
+          dim && "dim"
         )}
         onTouchStart={() => {
           if (disabled) {

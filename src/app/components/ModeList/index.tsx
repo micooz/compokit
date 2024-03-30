@@ -96,7 +96,7 @@ export function ModeList(props: ModeListProps) {
       <ReactSortable
         list={state.list}
         setList={(newList) => (state.list = newList)}
-        onSort={() => onSort()}
+        onSort={onSort}
         animation={200}
         handle=".dragHandle"
         className={responsiveClassNames}

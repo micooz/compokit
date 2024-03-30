@@ -1,20 +1,44 @@
 .pianoKeyboard {
   .whiteKey {
-    &.disabled {
-      background: #ccc;
-    }
-    &.pressed {
-      background: #6aafff;
+    &.dim {
+      background: #cae6fc;
       color: #fff;
+    }
+    &.playing,
+    &.hover {
+      background: #3576cb;
+      color: #fff;
+    }
+    &.disabled {
+      background: #ccc
+        repeating-linear-gradient(
+          30deg,
+          rgba(0, 0, 0, 0.3),
+          rgba(0, 0, 0, 0.3) 10px,
+          transparent 0,
+          transparent 20px
+        );
     }
   }
   .blackKey {
-    &.disabled {
-      background: #666;
-    }
-    &.pressed {
-      background: #095ab7;
+    &.dim {
+      background: #6e96b7;
       color: #fff;
+    }
+    &.playing,
+    &.hover {
+      background: #3576cb;
+      color: #fff;
+    }
+    &.disabled {
+      background: #666
+        repeating-linear-gradient(
+          30deg,
+          rgba(0, 0, 0, 0.3),
+          rgba(0, 0, 0, 0.3) 8px,
+          transparent 0,
+          transparent 16px
+        );
     }
   }
 }

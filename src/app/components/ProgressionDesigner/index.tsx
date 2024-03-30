@@ -68,7 +68,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       })),
     }));
 
-    state.current = storage.activeProgressionIndex || 0;
+    state.current = storage.currentProgressionIndex || 0;
     state.loaded = true;
   }
 
@@ -97,7 +97,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       return;
     }
     state.current = index;
-    storage.activeProgressionIndex = index;
+    storage.currentProgressionIndex = index;
   }
 
   function onAddProgression() {

@@ -5,14 +5,15 @@ import classNames from "classnames";
 import { ReactSortable } from "react-sortablejs";
 import { Skeleton } from "primereact/skeleton";
 import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
 
 import { ModeEnum } from "@/lib";
 import { storage } from "@/utils/storage";
 
 import { ChordTable } from "../ChordTable";
+import { ModeListOptions } from "../ModeListOptions";
 import { ModeItem, getItemId } from "./share";
 import { AddItemForm } from "./partials/AddItemForm";
-import { Button } from "primereact/button";
 
 export interface ModeListProps {
   className?: string;
@@ -80,6 +81,10 @@ export function ModeList(props: ModeListProps) {
 
   return (
     <div className={classNames(className)}>
+      <span className="text-base font-bold">Mode Tables</span>
+
+      <ModeListOptions className="my-2" />
+
       <Button
         size="small"
         icon="pi pi-plus"

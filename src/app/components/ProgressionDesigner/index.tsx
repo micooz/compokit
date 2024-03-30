@@ -5,16 +5,16 @@ import { useMount, useReactive } from "ahooks";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { InputText } from "primereact/inputtext";
-import StickyBox from "react-sticky-box";
+import { Button } from "primereact/button";
 
 import { Chord, Note, NoteArray } from "@/lib";
 import { ee } from "@/utils/ee";
 import { storage } from "@/utils/storage";
-import { sleep } from "@/utils/common";
 import { PianoKeyboard, PianoKeyboardRef } from "@/components/PianoKeyboard";
+import { Sticky } from "@/components/Sticky";
+
 import { ProgressionItem } from "../ProgressionItem";
 import { ChordItem, Progression } from "./share";
-
 import "./index.scss";
 
 export interface ProgressionDesignerProps {
@@ -26,7 +26,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
   const state = useReactive({
     loaded: false,
-    isPin: true,
+    isPin: false,
     isPlaying: { status: false, progression: null as Progression | null },
     current: 0,
     list: [] as Progression[],
@@ -291,11 +291,12 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
   }
 
   return (
-    <StickyBox
-      className={classNames("z-10 py-4 bg-white shadow-md", className)}
-      style={{ position: state.isPin ? "sticky" : undefined }}
+    <Sticky
+      disabled={!state.isPin}
+      className={classNames(className, "z-10 py-4 pb-2 bg-white shadow-md")}
+      offsetTop={50}
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2">
         <span className="text-base font-bold">Progression Designer</span>
         <i
           className={classNames(
@@ -393,19 +394,18 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       </Accordion>
 
       {state.loaded && (
-        <div
-          className={classNames(
-            "flex justify-center items-center -mt-[1px] border py-1 text-gray-600",
-            "cursor-pointer bg-gray-100 active:bg-gray-200"
-          )}
-          onClick={onAddProgression}
-        >
-          <i className="pi pi-plus mr-2" style={{ fontSize: "0.6rem" }} />
-          <span className="text-xs">Add Progression</span>
+        <div className={classNames("flex justify-center items-center mt-2")}>
+          <Button
+            label="Add Progression"
+            size="small"
+            icon="pi pi-plus"
+            text
+            onClick={onAddProgression}
+          />
         </div>
       )}
 
       <ConfirmDialog />
-    </StickyBox>
+    </Sticky>
   );
 }

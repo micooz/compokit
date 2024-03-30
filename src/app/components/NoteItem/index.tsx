@@ -6,7 +6,6 @@ import classNames from "classnames";
 import { TextBeauty } from "@/components/TextBeauty";
 import { ee } from "@/utils/ee";
 import { Note } from "@/lib/note";
-import { defaultGlobalConfig } from "@/constants";
 
 export interface NoteItemProps {
   children: string;
@@ -17,7 +16,7 @@ export function NoteItem(props: NoteItemProps) {
 
   const state = useReactive({
     highlight: "none" as "light" | "normal" | "dark" | "none",
-    showRelatedNotes: defaultGlobalConfig.showRelatedNotes,
+    showRelatedNotes: false,
   });
 
   ee.useEvent("SEARCH_NOTE", (keywords) => {

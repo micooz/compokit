@@ -7,24 +7,23 @@ import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 
 import { ee } from "@/utils/ee";
-import { defaultGlobalConfig } from "@/constants";
 import { storage } from "@/utils/storage";
 
-export interface GlobalOptionsProps {
+export interface ModeListOptionsProps {
   className?: string;
 }
 
-export function GlobalOptions(props: GlobalOptionsProps) {
+export function ModeListOptions(props: ModeListOptionsProps) {
   const { className } = props;
 
   const state = useReactive({
-    config: { ...defaultGlobalConfig },
+    showRelatedNotes: false,
     searchNote: "",
     loaded: false,
   });
 
   useMount(() => {
-    state.config = storage.globalConfig;
+    state.showRelatedNotes = storage.showRelatedNotes || false;
     state.loaded = true;
   });
 
@@ -37,16 +36,10 @@ export function GlobalOptions(props: GlobalOptionsProps) {
     });
   }
 
-  function onToggleMultiSelect(e: CheckboxChangeEvent) {
-    const checked = e.checked ?? false;
-    state.config.multiSelect = checked;
-    storage.globalConfig = state.config;
-  }
-
   function onToggleRelatedNotes(e: CheckboxChangeEvent) {
     const checked = e.checked ?? false;
-    state.config.showRelatedNotes = checked;
-    storage.globalConfig = state.config;
+    state.showRelatedNotes = checked;
+    storage.showRelatedNotes = checked;
 
     ee.emit("TOGGLE_SHOW_RELATED_NOTES", checked);
     refresh();
@@ -74,11 +67,7 @@ export function GlobalOptions(props: GlobalOptionsProps) {
     if (notes.includes(note)) {
       notes = notes.filter((item) => item !== note);
     } else {
-      if (state.config.multiSelect) {
-        notes.push(note);
-      } else {
-        notes = [note];
-      }
+      notes.push(note);
     }
 
     const keywords = notes.join(" ");
@@ -96,28 +85,12 @@ export function GlobalOptions(props: GlobalOptionsProps) {
   }
 
   return (
-    <div
-      className={classNames(
-        "flex flex-wrap gap-4 z-10 p-4 pb-0 py-2",
-        className
-      )}
-    >
-      <div className="flex items-center">
-        <Checkbox
-          inputId="multiSelect"
-          onChange={onToggleMultiSelect}
-          checked={state.config.multiSelect}
-        />
-        <label htmlFor="multiSelect" className="text-xs ml-2 whitespace-nowrap">
-          Multi Select
-        </label>
-      </div>
-
+    <div className={classNames("flex flex-wrap gap-4 py-2", className)}>
       <div className="flex items-center">
         <Checkbox
           inputId="showRelatedNotes"
           onChange={onToggleRelatedNotes}
-          checked={state.config.showRelatedNotes}
+          checked={state.showRelatedNotes}
         />
         <label
           htmlFor="showRelatedNotes"
@@ -127,7 +100,7 @@ export function GlobalOptions(props: GlobalOptionsProps) {
         </label>
       </div>
 
-      <div className="p-input-icon-left max-[760px]:w-full">
+      <div className="p-input-icon-left max-sm:w-full">
         <i className="pi pi-search" />
         <InputText
           id="search-note-input"

@@ -32,7 +32,7 @@ export function ProgressionItem(props: ProgressionItemProps) {
       {chords.length === 0 ? (
         <div className="text-xs text-center text-gray-400">No Chords Added</div>
       ) : (
-        <div className="flex-1 flex p-2 pb-4">
+        <div className="flex-1 flex">
           {chords.map((item, index) => (
             <Chord key={index} parentProps={props} item={item} index={index} />
           ))}

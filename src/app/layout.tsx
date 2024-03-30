@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PrimeReactProvider } from "primereact/api";
 
 import "./globals.css";
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html>
       <body className={inter.className}>
         <PrimeReactProvider>{children}</PrimeReactProvider>
+        <SpeedInsights />
       </body>
 
       {/* https://github.com/primefaces/primereact/issues/5187#issuecomment-1795848676 */}

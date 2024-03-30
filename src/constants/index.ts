@@ -10,8 +10,6 @@ export const defaultGlobalConfig: GlobalConfig = {
 
 export const storagePrefix = "compokit";
 
-export const baseUrl = '/compokit'
-
 export enum StorageKeys {
   USER_CONFIG = "USER_CONFIG",
 }

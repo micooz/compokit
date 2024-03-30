@@ -2,8 +2,6 @@ import "client-only";
 import { Sampler, start } from "tone";
 import type { Frequency, Time } from "tone/build/esm/core/type/Units";
 
-import { baseUrl } from "@/constants";
-
 const samples = {
   A0: "A0.[mp3|ogg]",
   C1: "C1.[mp3|ogg]",
@@ -85,7 +83,7 @@ class ToneUtil {
     return new Promise<Sampler>((resolve, reject) => {
       const sampler = new Sampler(samples, {
         release: 1,
-        baseUrl: `${baseUrl}/audio/salamander/`,
+        baseUrl: '/audio/salamander/',
         onload() {
           resolve(sampler.toDestination());
         },

@@ -7,7 +7,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 
-import { Chord, Note, NoteArray } from "@/lib";
+import { Chord, Mode, Note, NoteArray } from "@/lib";
 import { ee } from "@/utils/ee";
 import { storage } from "@/utils/storage";
 import { PianoKeyboard, PianoKeyboardRef } from "@/components/PianoKeyboard";
@@ -40,17 +40,6 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
   ee.useEvent("ADD_CHORD", onAddOrReplaceChord);
 
-  function save() {
-    storage.progressions = state.list.map((item) => ({
-      ...item,
-      chords: item.chords.map((it) => ({
-        ...it,
-        chord: it.chord.noteNames(),
-        omits: it.omits.names(),
-      })),
-    }));
-  }
-
   function load() {
     const progressions = storage.progressions?.length
       ? storage.progressions
@@ -65,11 +54,29 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
         octave: it.octave || 0,
         playing: false,
         replacing: false,
+        mode: it.mode ? Mode.from(it.mode.key, it.mode.type!) : undefined,
       })),
     }));
 
     state.current = storage.currentProgressionIndex || 0;
     state.loaded = true;
+  }
+
+  function save() {
+    storage.progressions = state.list.map((item) => ({
+      ...item,
+      chords: item.chords.map((it) => ({
+        ...it,
+        chord: it.chord.noteNames(),
+        omits: it.omits.names(),
+        mode: it.mode
+          ? {
+              key: it.mode.key().name(),
+              type: it.mode.type()!,
+            }
+          : undefined,
+      })),
+    }));
   }
 
   async function playChord(chord: ChordItem, duration = 600) {
@@ -156,8 +163,8 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
     const progression = state.list[index];
 
-    state.current = index;
     state.isPlaying = { status: true, progression };
+    state.current = index;
 
     for (const chord of progression.chords) {
       chord.playing = true;
@@ -179,7 +186,8 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     state.isPlaying = { status: false, progression: null };
   }
 
-  function onAddOrReplaceChord(chord: Chord) {
+  function onAddOrReplaceChord(args: { chord: Chord; mode: Mode }) {
+    const { chord, mode } = args;
     const currentProgression = state.list[state.current];
 
     if (!currentProgression) {
@@ -193,6 +201,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       octave: 0,
       playing: false,
       replacing: false,
+      mode,
     };
 
     const replacingChordIndex = currentProgression.chords.findIndex(

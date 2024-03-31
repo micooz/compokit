@@ -1,4 +1,5 @@
 import { Inter, Interval } from "./interval";
+import { NoteArray } from "./note-array";
 
 export enum NoteEnum {
   C = 1,
@@ -374,4 +375,4 @@ export class MidiNote extends Note {
 
 export type NoteType = string | Note;
 
-export type Notes = string[] | Note[];
+export type Notes = string[] | Note[] | NoteArray;

@@ -69,7 +69,7 @@ export function ChordTable(props: ChordTableProps) {
   }
 
   function onAddChord(chord: Chord) {
-    ee.emit("ADD_CHORD", chord);
+    ee.emit("ADD_CHORD", { chord, mode: modeIns.clone() });
   }
 
   // components

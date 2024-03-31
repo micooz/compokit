@@ -1,7 +1,13 @@
 import { Chord, ChordTypeEnum } from "./chord";
 import { transformObject } from "./common";
 import { Inter, Interval } from "./interval";
-import { AccidentalEnum, Note, NoteToNameOptions, NoteType } from "./note";
+import {
+  AccidentalEnum,
+  Note,
+  NoteToNameOptions,
+  NoteType,
+  Notes,
+} from "./note";
 import { NoteArray } from "./note-array";
 
 export enum ModeEnum {
@@ -133,8 +139,13 @@ export class Mode {
 
   private _mode?: ModeEnum;
 
-  constructor(notes: Note[] | NoteArray, mode?: ModeEnum) {
+  constructor(notes: Notes | NoteArray, mode?: ModeEnum) {
     this._noteArr = Array.isArray(notes) ? new NoteArray(notes) : notes;
+
+    if (this._noteArr.count() === 0) {
+      throw new Error("mode must contains at least one note");
+    }
+
     this._mode = mode;
   }
 
@@ -156,7 +167,7 @@ export class Mode {
       notes[6].accidental = AccidentalEnum.NaturalWithSymbol;
     }
 
-    return new Mode(new NoteArray(notes), mode);
+    return new Mode(notes, mode);
   }
 
   static modes() {
@@ -176,6 +187,14 @@ export class Mode {
     return keys;
   }
 
+  key() {
+    return this._noteArr.get(0)!;
+  }
+
+  type() {
+    return this._mode;
+  }
+
   chord(step: number, type?: ChordTypeEnum) {
     if (step < 1 || step > 7) {
       throw new Error("step must be between 1 and 7");
@@ -193,7 +212,7 @@ export class Mode {
       let idx = idxAbs % 7;
       idx = idx < 1 ? idx + 7 : idx;
 
-      const note = this._noteArr.get(idx - 1);
+      const note = this._noteArr.get(idx - 1)!;
 
       if (note.group) {
         note.group += Math.floor((idxAbs - 1) / 7);
@@ -259,6 +278,10 @@ export class Mode {
 
   notes() {
     return this._noteArr;
+  }
+
+  clone() {
+    return new Mode(this._noteArr.clone(), this._mode);
   }
 
   private isMajor() {

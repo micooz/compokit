@@ -1,4 +1,4 @@
-import type { Chord, NoteArray } from "@/lib";
+import type { Chord, Mode, NoteArray } from "@/lib";
 
 export type Progression = {
   name: string;
@@ -12,4 +12,5 @@ export type ChordItem = {
   octave: 0 | 8 | -8;
   playing: boolean;
   replacing: boolean;
+  mode?: Mode;
 };

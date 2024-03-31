@@ -20,7 +20,7 @@ test("NoteArray::count", () => {
 });
 
 test("NoteArray::get", () => {
-  expect(NoteArray.from(["C"]).get(0).name()).toBe("C");
+  expect(NoteArray.from(["C"]).get(0)!.name()).toBe("C");
   expect(NoteArray.from(["C"]).get(1)).toBe(undefined);
 });
 

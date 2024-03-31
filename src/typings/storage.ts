@@ -1,3 +1,5 @@
+import { ModeEnum } from "@/lib";
+
 export type ProgressionItem = {
   name: string;
   chords: {
@@ -5,5 +7,6 @@ export type ProgressionItem = {
     inversion: number;
     omits: string[];
     octave: 0 | 8 | -8;
+    mode?: { key: string; type: ModeEnum };
   }[];
 };

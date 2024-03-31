@@ -38,6 +38,11 @@ test("unknown mode should throw", () => {
   expect(() => Mode.from("C3", -1)).toThrow();
 });
 
+test("Mode:new", () => {
+  expect(() => new Mode([])).toThrow("mode must contains at least one note");
+  expect(() => new Mode(["C"])).not.toThrow();
+});
+
 test("Mode:modes", () => {
   expect(Mode.modes()).toMatchSnapshot();
 });
@@ -45,6 +50,14 @@ test("Mode:modes", () => {
 test("Mode:getKeys", () => {
   expect(Mode.getKeys(ModeEnum.NaturalMajor)).toMatchSnapshot();
   expect(() => Mode.getKeys(-1 as any)).toThrow("unsupported mode: -1");
+});
+
+test("Mode:key", () => {
+  expect(Mode.from("C4", ModeEnum.Aeolian).key().name()).toBe("C");
+});
+
+test("Mode:type", () => {
+  expect(Mode.from("C4", ModeEnum.Aeolian).type()).toBe(ModeEnum.Aeolian);
 });
 
 test("Mode::chord", () => {
@@ -88,7 +101,7 @@ test("Mode::parallel", () => {
     "C D E F G Ab B"
   );
 
-  expect(() => new Mode([]).parallel()).toThrow(
+  expect(() => new Mode(["C"]).parallel()).toThrow(
     "parallel() only works on major or minor mode"
   );
 });
@@ -102,7 +115,7 @@ test("Mode::relative", () => {
     "C D E F G Ab B"
   );
 
-  expect(() => new Mode([]).relative()).toThrow(
+  expect(() => new Mode(["C"]).relative()).toThrow(
     "relative() only works on major or minor mode"
   );
 });

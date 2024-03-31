@@ -152,7 +152,10 @@ function Chord(props: ChordProps) {
           <div
             className={classNames(
               chordToolClassnames,
-              "flex items-center gap-1 hover:bg-gray-200 active:bg-gray-300"
+              "flex items-center gap-1 hover:bg-gray-200 active:bg-gray-300",
+              {
+                "pointer-events-none": disabled,
+              }
             )}
             onClick={() => onInvertChord(index)}
           >
@@ -166,6 +169,7 @@ function Chord(props: ChordProps) {
           <div
             className={classNames(chordToolClassnames, "w-7", {
               "bg-[#3a7bd0] text-white": item.octave === 8,
+              "pointer-events-none": disabled,
             })}
             onClick={() => onToggleOctaveChord(index, 8)}
           >
@@ -175,6 +179,7 @@ function Chord(props: ChordProps) {
           <div
             className={classNames(chordToolClassnames, "w-7", {
               "bg-[#3a7bd0] text-white": item.octave === -8,
+              "pointer-events-none": disabled,
             })}
             onClick={() => onToggleOctaveChord(index, -8)}
           >

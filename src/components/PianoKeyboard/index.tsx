@@ -356,7 +356,7 @@ export const PianoKeyboard = React.forwardRef<
         >
           {collection.map((notes, index) => (
             <React.Fragment key={index}>
-              {renderWhiteKey({ note: notes.get(0), index })}
+              {renderWhiteKey({ note: notes.get(0)!, index })}
             </React.Fragment>
           ))}
         </div>

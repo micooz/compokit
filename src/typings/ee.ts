@@ -1,4 +1,4 @@
-import { Chord } from "@/lib";
+import { Chord, Mode } from "@/lib";
 
 export type EventName =
   | "TOGGLE_SHOW_RELATED_NOTES"
@@ -10,5 +10,5 @@ export type EventArgs = {
   TOGGLE_SHOW_RELATED_NOTES: boolean;
   SEARCH_NOTE: string;
   SELECT_NOTE: string;
-  ADD_CHORD: Chord;
+  ADD_CHORD: { chord: Chord; mode: Mode };
 };

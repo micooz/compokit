@@ -2,7 +2,6 @@ import { dedupBy } from "./common";
 import { Interval } from "./interval";
 import {
   Note,
-  NoteEnum,
   NoteIsOptions,
   NoteToNameOptions,
   NoteType,
@@ -20,13 +19,16 @@ export class NoteArray {
   private _notes: Note[] = [];
 
   constructor(notes: Notes) {
-    if (notes.length === 0) {
+    const count = notes instanceof NoteArray ? notes.count() : notes.length;
+    const first = notes instanceof NoteArray ? notes.get(0) : notes[0];
+
+    if (count === 0) {
       this._notes = [];
     }
-    if (typeof notes[0] === "string") {
+    if (typeof first === "string") {
       this._notes = (notes as string[]).map((note) => Note.from(note));
     }
-    if (notes[0] instanceof Note) {
+    if (first instanceof Note) {
       this._notes = (notes as Note[]).map((note) => note.clone());
     }
   }
@@ -43,7 +45,7 @@ export class NoteArray {
     return this._notes.length;
   }
 
-  get(index: number) {
+  get(index: number): Note | undefined {
     return this._notes[index]?.clone();
   }
 

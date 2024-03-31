@@ -3,9 +3,10 @@ import React, { useRef } from "react";
 import classNames from "classnames";
 import { useMount, useReactive } from "ahooks";
 import { Accordion, AccordionTab } from "primereact/accordion";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { confirmDialog } from "primereact/confirmdialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
+import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 
 import { Chord, Mode, Note, NoteArray } from "@/lib";
 import { ee } from "@/utils/ee";
@@ -30,6 +31,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     isPlaying: { status: false, progression: null as Progression | null },
     current: 0,
     list: [] as Progression[],
+    showModeStepHint: false,
   });
 
   useMount(load);
@@ -41,6 +43,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
   ee.useEvent("ADD_CHORD", onAddOrReplaceChord);
 
   function load() {
+    // load progression list
     const progressions = storage.progressions?.length
       ? storage.progressions
       : [{ name: "Progression 1", chords: [] }];
@@ -49,6 +52,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       ...item,
       chords: item.chords.map((it) => ({
         chord: new Chord(it.chord),
+        step: it.step,
         inversion: it.inversion || 0,
         omits: NoteArray.from(it.omits),
         octave: it.octave || 0,
@@ -58,7 +62,11 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       })),
     }));
 
+    // load other config
     state.current = storage.currentProgressionIndex || 0;
+    state.isPin = storage.pinProgressionDesigner;
+    state.showModeStepHint = storage.showModeStepHint;
+
     state.loaded = true;
   }
 
@@ -95,8 +103,14 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
   // events for <ProgressionList />
 
+  function onToggleShowModeStepHint(e: CheckboxChangeEvent) {
+    state.showModeStepHint = !!e.checked;
+    storage.showModeStepHint = state.showModeStepHint;
+  }
+
   function onTogglePin() {
     state.isPin = !state.isPin;
+    storage.pinProgressionDesigner = state.isPin;
   }
 
   function onTabChange(index: number) {
@@ -186,8 +200,12 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     state.isPlaying = { status: false, progression: null };
   }
 
-  function onAddOrReplaceChord(args: { chord: Chord; mode: Mode }) {
-    const { chord, mode } = args;
+  function onAddOrReplaceChord(args: {
+    chord: Chord;
+    step: number;
+    mode: Mode;
+  }) {
+    const { chord, step, mode } = args;
     const currentProgression = state.list[state.current];
 
     if (!currentProgression) {
@@ -196,6 +214,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
     const newChord: ChordItem = {
       chord,
+      step,
       inversion: 0,
       omits: NoteArray.from([]),
       octave: 0,
@@ -231,18 +250,9 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       return;
     }
 
-    const newChord: ChordItem = {
-      chord: chord.chord,
-      omits: chord.omits,
-      inversion: (chord.inversion + 1) % chord.chord.notes().count(),
-      octave: chord.octave,
-      playing: false,
-      replacing: chord.replacing,
-    };
+    chord.inversion = (chord.inversion + 1) % chord.chord.notes().count();
 
-    currentProgression.chords[index] = newChord;
-
-    playChord(newChord);
+    playChord(chord);
     save();
   }
 
@@ -280,6 +290,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
     chord.octave = chord.octave === octave ? 0 : octave;
     playChord(chord);
+    save();
   }
 
   function onToggleReplaceChord(index: number, replace: boolean) {
@@ -305,8 +316,11 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       className={classNames(className, "z-10 py-4 pb-2 bg-white shadow-md")}
       offsetTop={50}
     >
+      {/* title & pin */}
       <div className="flex justify-between items-center mb-2">
-        <span className="text-base font-bold">Progression Designer</span>
+        <span className="text-base font-bold border-l-4 pl-2 border-[#1174c0]">
+          Progression Designer
+        </span>
         <i
           className={classNames(
             "fa-regular fa-thumbtack cursor-pointer",
@@ -316,6 +330,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
         />
       </div>
 
+      {/* keyboard */}
       <div className="flex justify-center">
         <PianoKeyboard
           ref={pianoRef}
@@ -328,8 +343,24 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
         />
       </div>
 
+      {/* options */}
+      <div className="flex items-center py-2">
+        <Checkbox
+          inputId="showModeStepHint"
+          onChange={onToggleShowModeStepHint}
+          checked={state.showModeStepHint}
+        />
+        <label
+          htmlFor="showModeStepHint"
+          className="text-xs ml-2 whitespace-nowrap"
+        >
+          Show Mode/Step Hint
+        </label>
+      </div>
+
+      {/* progression list */}
       <Accordion
-        className=""
+        className="mt-2"
         // multiple
         activeIndex={state.current}
         onTabChange={(e) => onTabChange(e.index as number)}
@@ -392,6 +423,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
               chords={item.chords}
               pianoRef={pianoRef}
               disabled={state.isPlaying.status}
+              showModeStepHint={state.showModeStepHint}
               onInvertChord={onInvertChord}
               onToggleOmitNote={onToggleOmitNote}
               onToggleOctaveChord={onToggleOctaveChord}
@@ -402,6 +434,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
         ))}
       </Accordion>
 
+      {/* add button */}
       {state.loaded && (
         <div className={classNames("flex justify-center items-center mt-2")}>
           <Button
@@ -413,8 +446,6 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
           />
         </div>
       )}
-
-      <ConfirmDialog />
     </Sticky>
   );
 }

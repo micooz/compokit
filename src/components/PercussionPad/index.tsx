@@ -1,5 +1,5 @@
 "use client";
-import React, { useImperativeHandle, useRef } from "react";
+import React, { useEffect, useImperativeHandle, useRef } from "react";
 import { useReactive } from "ahooks";
 
 import { PianoKeyboardRef } from "../PianoKeyboard";
@@ -41,11 +41,11 @@ export const PercussionPad = React.forwardRef<
 
   const domRef = useRef<HTMLDivElement>(null);
 
-  // useEffect(() => {
-  //   if (active) {
-  //     domRef.current?.scrollIntoView(false);
-  //   }
-  // }, [active]);
+  useEffect(() => {
+    if (active) {
+      domRef.current?.scrollIntoView(false);
+    }
+  }, [active]);
 
   useImperativeHandle(ref, () => ({
     // highlight,

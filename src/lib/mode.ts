@@ -134,6 +134,8 @@ const modeToIntervals = transformObject(
   (_, abbrs) => abbrs.map((abbr) => Interval.from(abbr))
 );
 
+type ModeNameOptions = { shortName?: boolean } & NoteToNameOptions;
+
 export class Mode {
   private _noteArr: NoteArray;
 
@@ -265,13 +267,20 @@ export class Mode {
     return Mode.from(root, mode);
   }
 
-  name(opts?: NoteToNameOptions) {
+  name(opts?: ModeNameOptions) {
     const root = this._noteArr.root().name(opts);
 
-    const mode =
+    let mode =
       typeof this._mode === "undefined"
         ? "Unknown Mode"
         : modeEnumToString[this._mode];
+
+    if (opts?.shortName) {
+      mode = mode
+        .replace("Natural", "")
+        .replace("Harmonic", "")
+        .replace("Melodic", "");
+    }
 
     return `${root} ${mode}`;
   }

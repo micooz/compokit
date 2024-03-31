@@ -10,5 +10,5 @@ export type EventArgs = {
   TOGGLE_SHOW_RELATED_NOTES: boolean;
   SEARCH_NOTE: string;
   SELECT_NOTE: string;
-  ADD_CHORD: { chord: Chord; mode: Mode };
+  ADD_CHORD: { chord: Chord; step: number; mode: Mode };
 };

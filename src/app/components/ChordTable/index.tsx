@@ -2,7 +2,7 @@
 import React, { useMemo, useRef } from "react";
 import { Card } from "primereact/card";
 
-import { Chord, ChordTypeEnum, Mode, ModeEnum } from "@/lib";
+import { Chord, ChordTypeEnum, Mode } from "@/lib";
 import { ee } from "@/utils/ee";
 import { PianoKeyboard, PianoKeyboardRef } from "@/components/PianoKeyboard";
 import { PercussionPad } from "@/components/PercussionPad";
@@ -14,23 +14,21 @@ import { NoteItem } from "../NoteItem";
 import "./index.scss";
 
 export interface ChordTableProps {
-  keyNote: string;
-  mode: ModeEnum;
+  mode: Mode;
   onRemove?: () => void;
 }
 
 export function ChordTable(props: ChordTableProps) {
-  const { keyNote, mode, onRemove } = props;
+  const { mode, onRemove } = props;
 
   const pianoRef = useRef<PianoKeyboardRef>(null);
 
-  const [modeIns, rows] = useMemo(() => {
-    const modeIns = Mode.from(keyNote, mode);
+  const rows = useMemo(() => {
     const rows: { step: number; triad: Chord; seventh: Chord }[] = [];
 
     for (let i = 1; i <= 7; i++) {
-      const triad = modeIns.chord(i);
-      const seventh = modeIns.chord(i, ChordTypeEnum.Seventh);
+      const triad = mode.chord(i);
+      const seventh = mode.chord(i, ChordTypeEnum.Seventh);
 
       rows.push({
         step: i,
@@ -39,11 +37,11 @@ export function ChordTable(props: ChordTableProps) {
       });
     }
 
-    return [modeIns, rows];
-  }, [keyNote, mode]);
+    return rows;
+  }, [mode]);
 
   const modeKeys = useMemo(() => {
-    const arr = modeIns.notes();
+    const arr = mode.notes();
     const notes = arr.withGroup(3).valueOf();
 
     const repeat = notes[0].clone();
@@ -52,7 +50,7 @@ export function ChordTable(props: ChordTableProps) {
     notes.push(repeat);
 
     return notes.map((note) => note.nameWithGroup());
-  }, [modeIns]);
+  }, [mode]);
 
   // methods
 
@@ -68,15 +66,15 @@ export function ChordTable(props: ChordTableProps) {
     await pianoRef.current.attackOneByOne(reversedModeKeys, 200);
   }
 
-  function onAddChord(chord: Chord) {
-    ee.emit("ADD_CHORD", { chord, mode: modeIns.clone() });
+  function onAddChord(chord: Chord, step: number) {
+    ee.emit("ADD_CHORD", { chord, step, mode: mode.clone() });
   }
 
   // components
 
   function ModeTitle() {
-    const name = modeIns.name({ transformAccidental: true });
-    const notes = modeIns
+    const name = mode.name({ transformAccidental: true });
+    const notes = mode
       .notes()
       .names({ transformAccidental: true })
       .map((name, index, arr) => (
@@ -124,8 +122,8 @@ export function ChordTable(props: ChordTableProps) {
     );
   }
 
-  function ChordItem(props: { chord: Chord }) {
-    const { chord } = props;
+  function ChordItem(props: { chord: Chord; step: number }) {
+    const { chord, step } = props;
 
     const abbr = chord.toAbbr({ transformAccidental: true });
     const notes = useMemo(() => chord.notes().withGroup(3).names(), [chord]);
@@ -139,7 +137,7 @@ export function ChordTable(props: ChordTableProps) {
         <div className="inline-block px-1 border border-transparent">
           <TextBeauty>{abbr}</TextBeauty>
         </div>
-        <TouchEvent onTouchStart={() => onAddChord(chord)}>
+        <TouchEvent onTouchStart={() => onAddChord(chord, step)}>
           <i
             className="pi pi-plus p-1 hover:bg-gray-300 active:bg-gray-400"
             style={{ fontSize: "0.8rem" }}
@@ -161,7 +159,7 @@ export function ChordTable(props: ChordTableProps) {
         dottedNotes={[modeKeys[0]]}
       />
       <div className="overflow-auto">
-        <table>
+        <table className="text-sm">
           <thead>
             <tr>
               <th style={{ width: 70 }}>Step</th>
@@ -175,10 +173,10 @@ export function ChordTable(props: ChordTableProps) {
               <tr key={item.step}>
                 <td className="">{item.step}</td>
                 <td className="hover:bg-gray-100 cursor-pointer">
-                  <ChordItem chord={item.triad} />
+                  <ChordItem chord={item.triad} step={item.step} />
                 </td>
                 <td className="hover:bg-gray-100 cursor-pointer">
-                  <ChordItem chord={item.seventh} />
+                  <ChordItem chord={item.seventh} step={item.step} />
                 </td>
                 <td className="px-2">
                   {item.seventh

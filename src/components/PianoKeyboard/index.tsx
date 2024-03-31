@@ -180,8 +180,13 @@ export const PianoKeyboard = React.forwardRef<
   // components
 
   function HighlightHint() {
-    const notes = state.playingNotes.map((note) => Note.from(note));
+    const notes =
+      state.playingNotes.length > 0
+        ? state.playingNotes
+        : state.lastPlayedNotes;
+
     const hint = notes
+      .map((note) => Note.from(note))
       .map((note) => note.nameWithGroup({ transformAccidental: true }))
       .join(", ");
 

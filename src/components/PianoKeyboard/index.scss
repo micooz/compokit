@@ -1,8 +1,7 @@
 .pianoKeyboard {
   .whiteKey {
     &.dim {
-      background: #cae6fc;
-      color: #fff;
+      background: #dee9f9;
     }
     &.playing,
     &.hover {
@@ -22,13 +21,11 @@
   }
   .blackKey {
     &.dim {
-      background: #6e96b7;
-      color: #fff;
+      background: #aabbd0;
     }
     &.playing,
     &.hover {
       background: #3576cb;
-      color: #fff;
     }
     &.disabled {
       background: #666

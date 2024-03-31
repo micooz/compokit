@@ -184,8 +184,8 @@ export class Chord {
     return this._noteArr.names(opts);
   }
 
-  join(separator = " ") {
-    return this._noteArr.join(separator);
+  join(separator = " ", opts?: NoteToNameOptions) {
+    return this._noteArr.join(separator, opts);
   }
 
   clone() {

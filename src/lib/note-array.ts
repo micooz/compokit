@@ -5,14 +5,15 @@ import {
   NoteEnum,
   NoteIsOptions,
   NoteToNameOptions,
+  NoteType,
   Notes,
 } from "./note";
 
 export type WithGroupOptions = {
-  autoGroup?: boolean;
+  // autoGroup?: boolean;
   omits?: NoteArray;
   octave?: 0 | 8 | -8;
-  checkGroup?: boolean;
+  noteIsOptions?: NoteIsOptions;
 };
 
 export class NoteArray {
@@ -43,7 +44,7 @@ export class NoteArray {
   }
 
   get(index: number) {
-    return this._notes[index].clone();
+    return this._notes[index]?.clone();
   }
 
   root() {
@@ -74,13 +75,6 @@ export class NoteArray {
     return new NoteArray(notes);
   }
 
-  forPair(func: (prev: Note, next: Note) => void) {
-    return this._notes.reduce((prev, next) => {
-      func(prev, next);
-      return next;
-    });
-  }
-
   clone() {
     return new NoteArray(this._notes.map((note) => note.clone()));
   }
@@ -90,18 +84,11 @@ export class NoteArray {
   }
 
   names(opts?: NoteToNameOptions) {
-    return this._notes.map((note) =>
-      note.nameWithGroup({ transformAccidental: true, ...opts })
-    );
+    return this._notes.map((note) => note.nameWithGroup(opts));
   }
 
   withGroup(base: number, opts?: WithGroupOptions) {
-    const {
-      autoGroup = false,
-      omits,
-      octave = 0,
-      checkGroup = false,
-    } = opts || {};
+    const { omits, octave = 0, noteIsOptions } = opts || {};
 
     let group = base;
 
@@ -112,19 +99,19 @@ export class NoteArray {
       group -= 1;
     }
 
-    if (autoGroup) {
-      const first = this._notes[0];
-      const size = this._notes.length;
+    // if (autoGroup) {
+    //   const first = this._notes[0];
+    //   const size = this._notes.length;
 
-      // triad
-      if (size <= 3 && first.index <= NoteEnum.E) {
-        group = 4;
-      }
-      // seventh
-      if (size <= 4 && first.index === NoteEnum.C) {
-        group = 4;
-      }
-    }
+    //   // triad
+    //   if (size <= 3 && first.index <= NoteEnum.E) {
+    //     group += 1;
+    //   }
+    //   // seventh
+    //   if (size <= 4 && first.index === NoteEnum.C) {
+    //     group += 1;
+    //   }
+    // }
 
     const notes = this._notes.map((note, index) => {
       const currentNote = note.clone();
@@ -142,23 +129,30 @@ export class NoteArray {
     let arr = new NoteArray(notes);
 
     if (omits && omits.count() > 0) {
-      arr = arr.omit(omits, { checkAccidental: true, checkGroup });
+      arr = arr.omit(omits, noteIsOptions);
     }
 
     return arr;
   }
 
-  include(note: Note, opts?: NoteIsOptions) {
+  includes(note: NoteType, opts?: NoteIsOptions) {
     for (const item of this._notes) {
-      if (note.is(item, opts)) {
+      if (Note.from(note).is(item, opts)) {
         return true;
       }
     }
     return false;
   }
 
-  omit(notes: NoteArray, opts?: NoteIsOptions) {
-    const newNotes = this._notes.filter((item) => !notes.include(item));
+  private forPair(func: (prev: Note, next: Note) => void) {
+    return this._notes.reduce((prev, next) => {
+      func(prev, next);
+      return next;
+    });
+  }
+
+  private omit(notes: NoteArray, opts?: NoteIsOptions) {
+    const newNotes = this._notes.filter((item) => !notes.includes(item, opts));
     return NoteArray.from(newNotes);
   }
 }

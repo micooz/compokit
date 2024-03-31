@@ -128,10 +128,7 @@ export function ChordTable(props: ChordTableProps) {
     const { chord } = props;
 
     const abbr = chord.toAbbr({ transformAccidental: true });
-    const notes = useMemo(
-      () => chord.notes().withGroup(3).names({ transformAccidental: false }),
-      [chord]
-    );
+    const notes = useMemo(() => chord.notes().withGroup(3).names(), [chord]);
 
     return (
       <PercussionPad

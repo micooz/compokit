@@ -58,14 +58,7 @@ export function range(
     throw new Error("note.group must be both set or not set");
   }
 
-  const opts = {
-    checkAccidental: true,
-    checkGroup: true,
-  };
-
-  const fromIndex = list.findIndex((item) =>
-    item.some((it) => start.is(it, { ...opts, checkGroup: false }))
-  );
+  const fromIndex = list.findIndex((item) => item.some((it) => start.is(it)));
 
   let index = fromIndex;
   let group = start.group;
@@ -105,7 +98,10 @@ export function range(
 
     notes.push(NoteArray.from(_notes));
 
-    if (_notes[0].is(end, opts) || _notes[1]?.is(end, opts)) {
+    if (
+      _notes[0].is(end, { checkGroup: true }) ||
+      _notes[1]?.is(end, { checkGroup: true })
+    ) {
       break;
     }
 

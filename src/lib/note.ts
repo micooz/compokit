@@ -229,7 +229,7 @@ export class Note {
   }
 
   is(note: NoteType, opts?: NoteIsOptions) {
-    const { checkGroup = false, checkAccidental = false } = opts || {};
+    const { checkGroup = false, checkAccidental = true } = opts || {};
 
     const _note = Note.from(note);
     const conditions: boolean[] = [];

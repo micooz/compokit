@@ -52,7 +52,7 @@ export class Quality {
   static fromAbbr(abbr: string) {
     const value = abbrToQualityEnumMap[abbr];
 
-    if (typeof value === "undefined") {
+    if (value === undefined) {
       const keys = Object.keys(abbrToQualityEnumMap);
 
       throw new Error(

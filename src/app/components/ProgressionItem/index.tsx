@@ -73,7 +73,7 @@ function Chord(props: ChordProps) {
       .inversion(item.inversion)
       .notes()
       .withGroup(3, { omits: item.omits, octave: item.octave })
-      .names({ transformAccidental: false });
+      .names();
   }, [item.chord, item.inversion, item.omits, item.octave]);
 
   return (
@@ -125,11 +125,7 @@ function Chord(props: ChordProps) {
                 <div key={idx} className="flex items-center">
                   <Checkbox
                     inputId={inputId}
-                    checked={
-                      !item.omits.include(note, {
-                        checkAccidental: true,
-                      })
-                    }
+                    checked={!item.omits.includes(note)}
                     disabled={
                       disabled ||
                       // for non-triad chords, prevent the last note from omitting.

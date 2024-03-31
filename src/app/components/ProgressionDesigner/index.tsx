@@ -81,7 +81,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       .inversion(chord.inversion)
       .notes()
       .withGroup(3, { omits: chord.omits, octave: chord.octave })
-      .names({ transformAccidental: false });
+      .names();
 
     await pianoRef.current.attackRelease(notes, duration);
   }

@@ -7,6 +7,8 @@ import type { ProgressionItem } from "@/typings/storage";
 class Storage {
   private prefix = "compokit";
 
+  // progression
+
   get progressions(): ProgressionItem[] | undefined {
     return this.getData("progression", "list");
   }
@@ -22,6 +24,24 @@ class Storage {
   set currentProgressionIndex(index: number) {
     this.setData("progression", "current", index);
   }
+
+  get pinProgressionDesigner() {
+    return this.getData("progression", "pinProgressionDesigner");
+  }
+
+  set pinProgressionDesigner(pin: boolean) {
+    this.setData("progression", "pinProgressionDesigner", pin);
+  }
+
+  get showModeStepHint() {
+    return this.getData("progression", "showModeStepHint");
+  }
+
+  set showModeStepHint(show: boolean) {
+    this.setData("progression", "showModeStepHint", show);
+  }
+
+  // mode
 
   get showRelatedNotes() {
     return this.getData("mode", "showRelatedNotes");

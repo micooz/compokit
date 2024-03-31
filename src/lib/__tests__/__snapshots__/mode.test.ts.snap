@@ -1,5 +1,79 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Mode:getKeys 1`] = `
+[
+  "C",
+  "G",
+  "D",
+  "A",
+  "E",
+  "B",
+  "F",
+  "B♭",
+  "E♭",
+  "A♭",
+  "D♭",
+  "G♭",
+]
+`;
+
+exports[`Mode:modes 1`] = `
+[
+  {
+    "label": "Natural Major",
+    "value": 0,
+  },
+  {
+    "label": "Harmonic Major",
+    "value": 1,
+  },
+  {
+    "label": "Melodic Major",
+    "value": 2,
+  },
+  {
+    "label": "Natural Minor",
+    "value": 3,
+  },
+  {
+    "label": "Harmonic Minor",
+    "value": 4,
+  },
+  {
+    "label": "Melodic Minor",
+    "value": 5,
+  },
+  {
+    "label": "Ionian",
+    "value": 6,
+  },
+  {
+    "label": "Dorian",
+    "value": 7,
+  },
+  {
+    "label": "Phrygian",
+    "value": 8,
+  },
+  {
+    "label": "Lydian",
+    "value": 9,
+  },
+  {
+    "label": "Mixolydian",
+    "value": 10,
+  },
+  {
+    "label": "Aeolian",
+    "value": 11,
+  },
+  {
+    "label": "Locrian",
+    "value": 12,
+  },
+]
+`;
+
 exports[`scale notes should match 1`] = `
 [
   "C Natural Major: C D E F G A B",

@@ -180,8 +180,13 @@ export const PianoKeyboard = React.forwardRef<
   // components
 
   function HighlightHint() {
-    const notes = state.playingNotes.map((note) => Note.from(note));
+    const notes =
+      state.playingNotes.length > 0
+        ? state.playingNotes
+        : state.lastPlayedNotes;
+
     const hint = notes
+      .map((note) => Note.from(note))
       .map((note) => note.nameWithGroup({ transformAccidental: true }))
       .join(", ");
 
@@ -206,9 +211,7 @@ export const PianoKeyboard = React.forwardRef<
 
     const nextKeys = collection[index + 1]?.valueOf() || [];
 
-    const disabled = !availableKeys.find((key) =>
-      key.is(note, { checkAccidental: true })
-    );
+    const disabled = !availableKeys.find((key) => key.is(note));
 
     const noteWithGroup = note.nameWithGroup();
 
@@ -216,9 +219,7 @@ export const PianoKeyboard = React.forwardRef<
     const hover = state.hoverNotes.includes(noteWithGroup);
     const dim = state.lastPlayedNotes.includes(noteWithGroup);
 
-    const dotted = dottedKeys.find((key) =>
-      key.is(note, { checkAccidental: true })
-    );
+    const dotted = dottedKeys.find((key) => key.is(note));
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const showLabel = useMemo(() => {
@@ -273,9 +274,7 @@ export const PianoKeyboard = React.forwardRef<
     }
 
     const disabled = !availableKeys.find(
-      (key) =>
-        key.is(nextA, { checkAccidental: true }) ||
-        key.is(nextB, { checkAccidental: true })
+      (key) => key.is(nextA) || key.is(nextB)
     );
 
     const nextAWithGroup = nextA.nameWithGroup();
@@ -293,11 +292,7 @@ export const PianoKeyboard = React.forwardRef<
       state.lastPlayedNotes.includes(nextAWithGroup) ||
       state.lastPlayedNotes.includes(nextBWithGroup);
 
-    const dotted = dottedKeys.find(
-      (key) =>
-        key.is(nextA, { checkAccidental: true }) ||
-        key.is(nextB, { checkAccidental: true })
-    );
+    const dotted = dottedKeys.find((key) => key.is(nextA) || key.is(nextB));
 
     return (
       <TouchEvent
@@ -366,7 +361,7 @@ export const PianoKeyboard = React.forwardRef<
         >
           {collection.map((notes, index) => (
             <React.Fragment key={index}>
-              {renderWhiteKey({ note: notes.get(0), index })}
+              {renderWhiteKey({ note: notes.get(0)!, index })}
             </React.Fragment>
           ))}
         </div>

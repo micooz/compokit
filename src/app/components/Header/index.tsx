@@ -24,8 +24,8 @@ export function Header(props: HeaderProps) {
           },
         ]}
         end={
-          <Link href="https://github.com/micooz/compokit" target="_blank">
-            <Button label="Github" icon="pi pi-github" text />
+          <Link  className="px-2" href="https://github.com/micooz/compokit" target="_blank">
+            <i className="pi pi-github" />
           </Link>
         }
       />

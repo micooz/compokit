@@ -17,6 +17,7 @@ export interface ProgressionItemProps {
   chords: ChordItem[];
   pianoRef: React.RefObject<PianoKeyboardRef>;
   disabled?: boolean;
+  showModeStepHint?: boolean;
   onInvertChord: (index: number) => void;
   onToggleOmitNote: (index: number, note: Note, omit: boolean) => void;
   onToggleOctaveChord: (index: number, octave: 0 | 8 | -8) => void;
@@ -25,7 +26,9 @@ export interface ProgressionItemProps {
 }
 
 export function ProgressionItem(props: ProgressionItemProps) {
-  const { chords } = props;
+  const { chords, showModeStepHint } = props;
+
+  const showHint = showModeStepHint && chords.every((chord) => !!chord.mode);
 
   return (
     <div className="progressionItem overflow-auto select-none">
@@ -33,8 +36,13 @@ export function ProgressionItem(props: ProgressionItemProps) {
         <div className="text-xs text-center text-gray-400">No Chords Added</div>
       ) : (
         <div className="flex-1 flex">
-          {chords.map((item, index) => (
-            <Chord key={index} parentProps={props} item={item} index={index} />
+          {chords.map((current, index) => (
+            <div key={index}>
+              {showHint && (
+                <ModeStepHint current={current} previous={chords[index - 1]} />
+              )}
+              <Chord parentProps={props} current={current} index={index} />
+            </div>
           ))}
         </div>
       )}
@@ -42,14 +50,43 @@ export function ProgressionItem(props: ProgressionItemProps) {
   );
 }
 
+interface ModeStepHintProps {
+  previous?: ChordItem;
+  current: ChordItem;
+}
+
+function ModeStepHint(props: ModeStepHintProps) {
+  const { current, previous } = props;
+
+  const showMode = current.mode!.name() !== previous?.mode!.name();
+
+  return (
+    <div className={classNames("flex items-center gap-2 text-sm py-1")}>
+      {showMode && (
+        <div className="ml-3 border-l-2 border-transparent">
+          {current.mode!.name({
+            shortName: true,
+            transformAccidental: true,
+          })}
+        </div>
+      )}
+      <div className="flex-1 flex justify-center items-center gap-2">
+        {!showMode && <div className="flex-1 border-b border-gray-200" />}
+        <div className="">{current.step}</div>
+        <div className="flex-1 border-b border-gray-200" />
+      </div>
+    </div>
+  );
+}
+
 interface ChordProps {
   parentProps: ProgressionItemProps;
-  item: ChordItem;
+  current: ChordItem;
   index: number;
 }
 
 function Chord(props: ChordProps) {
-  const { parentProps, item, index } = props;
+  const { parentProps, current, index } = props;
 
   const {
     id,
@@ -62,33 +99,36 @@ function Chord(props: ChordProps) {
     onRemoveChord,
   } = parentProps;
 
+  const { chord, inversion, omits, octave, playing, replacing } = current;
+
   const chordToolClassnames = classNames(
     "px-1 text-sm text-center cursor-pointer"
   );
 
-  const notes = item.chord.notes().valueOf();
+  const notes = current.chord.notes().valueOf();
 
   const notesForPad = useMemo(() => {
-    return item.chord
-      .inversion(item.inversion)
+    return chord
+      .inversion(inversion)
       .notes()
-      .withGroup(3, { omits: item.omits, octave: item.octave })
-      .names({ transformAccidental: false });
-  }, [item.chord, item.inversion, item.omits, item.octave]);
+      .withGroup(3, { omits, octave })
+      .names();
+  }, [chord, inversion, omits, octave]);
 
   return (
     <div
-      className={classNames("flex flex-col gap-2 border-2 p-3", {
-        "border-transparent": !item.replacing,
-        "border-orange-300 bg-orange-50": item.replacing,
+      className={classNames("relative flex flex-col gap-2 border-2 p-3", {
+        "border-transparent": !replacing,
+        "border-orange-300 bg-orange-50": replacing,
       })}
     >
+      {/* pad */}
       <PercussionPad
         className="relative flex flex-col items-center p-2 border cursor-pointer hover:bg-gray-100"
         notes={notesForPad}
         pianoRef={pianoRef}
         disabled={disabled}
-        active={item.playing}
+        active={playing}
       >
         {/* remove icon */}
         {!disabled && (
@@ -105,9 +145,7 @@ function Chord(props: ChordProps) {
 
         {/* chord label */}
         <span className="mb-1 font-semibold">
-          {item.chord
-            .inversion(item.inversion)
-            .toAbbr({ transformAccidental: true })}
+          {chord.inversion(inversion).toAbbr({ transformAccidental: true })}
         </span>
       </PercussionPad>
 
@@ -115,7 +153,7 @@ function Chord(props: ChordProps) {
       <div className="flex flex-col items-center gap-1">
         {/* omit control */}
         <div className="flex gap-1">
-          {item.chord
+          {chord
             .rootPosition()
             .notes()
             .valueOf()
@@ -125,11 +163,7 @@ function Chord(props: ChordProps) {
                 <div key={idx} className="flex items-center">
                   <Checkbox
                     inputId={inputId}
-                    checked={
-                      !item.omits.include(note, {
-                        checkAccidental: true,
-                      })
-                    }
+                    checked={!omits.includes(note)}
                     disabled={
                       disabled ||
                       // for non-triad chords, prevent the last note from omitting.
@@ -156,7 +190,10 @@ function Chord(props: ChordProps) {
           <div
             className={classNames(
               chordToolClassnames,
-              "flex items-center gap-1 hover:bg-gray-200 active:bg-gray-300"
+              "flex items-center gap-1 hover:bg-gray-200 active:bg-gray-300",
+              {
+                "pointer-events-none": disabled,
+              }
             )}
             onClick={() => onInvertChord(index)}
           >
@@ -164,12 +201,13 @@ function Chord(props: ChordProps) {
               className={classNames("fa-solid fa-repeat relative top-[1px]")}
               style={{ fontSize: "0.7rem" }}
             />
-            {item.inversion}
+            {inversion}
           </div>
           {/* +8 */}
           <div
             className={classNames(chordToolClassnames, "w-7", {
-              "bg-[#3a7bd0] text-white": item.octave === 8,
+              "bg-[#3a7bd0] text-white": octave === 8,
+              "pointer-events-none": disabled,
             })}
             onClick={() => onToggleOctaveChord(index, 8)}
           >
@@ -178,7 +216,8 @@ function Chord(props: ChordProps) {
           {/* -8 */}
           <div
             className={classNames(chordToolClassnames, "w-7", {
-              "bg-[#3a7bd0] text-white": item.octave === -8,
+              "bg-[#3a7bd0] text-white": octave === -8,
+              "pointer-events-none": disabled,
             })}
             onClick={() => onToggleOctaveChord(index, -8)}
           >
@@ -190,7 +229,7 @@ function Chord(props: ChordProps) {
         <div className="flex items-center gap-1">
           <Checkbox
             inputId={`checkbox-chord_${id}_${index}`}
-            checked={item.replacing}
+            checked={replacing}
             disabled={disabled}
             onChange={(e) => onToggleReplaceChord(index, !!e.checked)}
           />
@@ -198,7 +237,7 @@ function Chord(props: ChordProps) {
             htmlFor={`checkbox-chord_${id}_${index}`}
             className="text-sm cursor-pointer"
           >
-            Replace
+            Select
           </label>
         </div>
       </div>

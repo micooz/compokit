@@ -6,8 +6,9 @@ import { ReactSortable } from "react-sortablejs";
 import { Skeleton } from "primereact/skeleton";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import { confirmDialog } from "primereact/confirmdialog";
 
-import { ModeEnum } from "@/lib";
+import { Mode, ModeEnum } from "@/lib";
 import { storage } from "@/utils/storage";
 
 import { ChordTable } from "../ChordTable";
@@ -44,9 +45,22 @@ export function ModeList(props: ModeListProps) {
     storage.tables = state.list;
   }
 
-  function onRemove(id: string) {
-    state.list = state.list.filter((item) => item.id !== id);
-    storage.tables = state.list;
+  function onRemove(id: string, mode: Mode) {
+    const name = mode.name({ transformAccidental: true });
+
+    confirmDialog({
+      header: "Remove Table",
+      message: (
+        <div>
+          Are you sure to remove:
+          <span className="inline-block mx-2 font-semibold">{name}</span>?
+        </div>
+      ),
+      accept: () => {
+        state.list = state.list.filter((item) => item.id !== id);
+        storage.tables = state.list;
+      },
+    });
   }
 
   function onAdd(mode: ModeEnum, key: string) {
@@ -81,7 +95,9 @@ export function ModeList(props: ModeListProps) {
 
   return (
     <div className={classNames(className)}>
-      <span className="text-base font-bold">Mode Tables</span>
+      <span className="text-base font-bold border-l-4 pl-2 border-[#1174c0]">
+        Mode Tables
+      </span>
 
       <ModeListOptions className="my-2" />
 
@@ -101,14 +117,17 @@ export function ModeList(props: ModeListProps) {
         handle=".dragHandle"
         className={responsiveClassNames}
       >
-        {state.list.map((item) => (
-          <ChordTable
-            key={item.id}
-            keyNote={item.key}
-            mode={item.mode}
-            onRemove={() => onRemove(item.id)}
-          />
-        ))}
+        {state.list.map((item) => {
+          const mode = Mode.from(item.key, item.mode);
+
+          return (
+            <ChordTable
+              key={item.id}
+              mode={mode}
+              onRemove={() => onRemove(item.id, mode)}
+            />
+          );
+        })}
       </ReactSortable>
 
       <Dialog

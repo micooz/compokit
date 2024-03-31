@@ -46,7 +46,7 @@ export class Chord {
     this._noteArr = new NoteArray(notes);
 
     // TODO: supports structures containing omitted and added notes
-    if (notes.length < 3) {
+    if (this._noteArr.count() < 3) {
       throw new Error("chord must contain at least three note");
     }
 
@@ -70,7 +70,7 @@ export class Chord {
     }
 
     // root note
-    const root = dedup.get(rootIndex);
+    const root = dedup.get(rootIndex)!;
 
     this._root = root;
     this._inversion = inversion;
@@ -125,7 +125,7 @@ export class Chord {
   }
 
   toAbbr(opts?: NoteToNameOptions) {
-    const first = this._noteArr.get(0).name(opts);
+    const first = this._noteArr.get(0)!.name(opts);
 
     // C
     const root = this._root.name(opts);
@@ -184,8 +184,8 @@ export class Chord {
     return this._noteArr.names(opts);
   }
 
-  join(separator = " ") {
-    return this._noteArr.join(separator);
+  join(separator = " ", opts?: NoteToNameOptions) {
+    return this._noteArr.join(separator, opts);
   }
 
   clone() {

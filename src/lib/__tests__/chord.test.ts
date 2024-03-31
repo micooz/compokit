@@ -16,7 +16,7 @@ test("Chord::new", () => {
   expect(new Chord(["C", "Eb", "Gb", "Bb"]).toAbbr()).toBe("Cm7(♭5)");
 
   expect(() => new Chord(["C", "E#", "G"]).toAbbr()).toThrow(
-    "unable to determine the appropriate chord representation for: C E♯ G"
+    "unable to determine the appropriate chord representation for: C E# G"
   );
 });
 

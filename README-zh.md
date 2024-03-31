@@ -1,5 +1,7 @@
 # compokit
 
+[![codecov](https://codecov.io/gh/micooz/compokit/graph/badge.svg?token=X2BKRIK6WU)](https://codecov.io/gh/micooz/compokit)
+
 [English](./README.md)
 
 一套作曲工具集。

@@ -1,5 +1,7 @@
 # compokit
 
+[![codecov](https://codecov.io/gh/micooz/compokit/graph/badge.svg?token=X2BKRIK6WU)](https://codecov.io/gh/micooz/compokit)
+
 [中文](./README-zh.md)
 
 A set of tools for music composer.

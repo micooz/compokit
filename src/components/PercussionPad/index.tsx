@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useImperativeHandle, useRef } from "react";
+import React, { useImperativeHandle } from "react";
 import { useReactive } from "ahooks";
 
 import { PianoKeyboardRef } from "../PianoKeyboard";
@@ -39,14 +39,6 @@ export const PercussionPad = React.forwardRef<
     pressed: false,
   });
 
-  const domRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (active) {
-      domRef.current?.scrollIntoView(false);
-    }
-  }, [active]);
-
   useImperativeHandle(ref, () => ({
     // highlight,
   }));
@@ -76,20 +68,18 @@ export const PercussionPad = React.forwardRef<
   }
 
   return (
-    <div ref={domRef}>
-      <TouchEvent
-        className={className}
-        style={{
-          background: state.pressed || active ? activeBgColor : undefined,
-          color: state.pressed || active ? activeFgColor : undefined,
-        }}
-        onMouseEnter={onMouseEnter}
-        onTouchStart={onAttack}
-        onTouchEnd={onRelease}
-        onMouseLeave={onRelease}
-      >
-        {children}
-      </TouchEvent>
-    </div>
+    <TouchEvent
+      className={className}
+      style={{
+        background: state.pressed || active ? activeBgColor : undefined,
+        color: state.pressed || active ? activeFgColor : undefined,
+      }}
+      onMouseEnter={onMouseEnter}
+      onTouchStart={onAttack}
+      onTouchEnd={onRelease}
+      onMouseLeave={onRelease}
+    >
+      {children}
+    </TouchEvent>
   );
 });

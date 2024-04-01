@@ -8,8 +8,10 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { confirmDialog } from "primereact/confirmdialog";
 
-import { Mode, ModeEnum } from "@/lib";
+import { Chord, Mode, ModeEnum } from "@/lib";
 import { storage } from "@/utils/storage";
+import { ee } from "@/utils/ee";
+import { Sticky } from "@/components/Sticky";
 
 import { ChordTable } from "../ChordTable";
 import { ModeListOptions } from "../ModeListOptions";
@@ -27,6 +29,7 @@ export function ModeList(props: ModeListProps) {
     list: [] as ModeItem[],
     loaded: false,
     addItemDialog: { show: false },
+    selectedChord: undefined as Chord | undefined,
   });
 
   useMount(() => {
@@ -39,6 +42,10 @@ export function ModeList(props: ModeListProps) {
     ];
     state.list = tables;
     state.loaded = true;
+  });
+
+  ee.useEvent("SELECT_CHORD", (chord) => {
+    state.selectedChord = chord;
   });
 
   function onSort() {
@@ -69,37 +76,15 @@ export function ModeList(props: ModeListProps) {
     storage.tables = state.list;
   }
 
-  const responsiveClassNames = classNames(
-    "grid gap-3 grid-cols-4",
-    "max-[2115px]:grid-cols-3",
-    "max-[1513px]:grid-cols-2",
-    "max-[1080px]:grid-cols-1"
-  );
-
-  if (!state.loaded) {
-    return (
-      <div className={responsiveClassNames}>
-        <div className="flex flex-col gap-2">
-          <Skeleton width="100%" height="37px" />
-          <Skeleton width="70%" height="24px" />
-          <Skeleton width="80%" height="14px" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Skeleton width="100%" height="37px" />
-          <Skeleton width="70%" height="24px" />
-          <Skeleton width="80%" height="14px" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={classNames(className)}>
-      <span className="text-base font-bold border-l-4 pl-2 border-[#1174c0]">
-        Mode Tables
-      </span>
+      <Sticky className="z-10 bg-white pt-4 mb-4 border-b" offsetTop={50}>
+        <span className="text-base font-bold border-l-4 pl-2 border-[#1174c0]">
+          Mode Tables
+        </span>
 
-      <ModeListOptions className="my-2" />
+        <ModeListOptions className="my-2" />
+      </Sticky>
 
       <Button
         size="small"
@@ -109,26 +94,35 @@ export function ModeList(props: ModeListProps) {
         onClick={() => (state.addItemDialog.show = true)}
       />
 
-      <ReactSortable
-        list={state.list}
-        setList={(newList) => (state.list = newList)}
-        onSort={onSort}
-        animation={200}
-        handle=".dragHandle"
-        className={responsiveClassNames}
-      >
-        {state.list.map((item) => {
-          const mode = Mode.from(item.key, item.mode);
+      {!state.loaded ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton width="100%" height="37px" />
+          <Skeleton width="70%" height="24px" />
+          <Skeleton width="80%" height="14px" />
+        </div>
+      ) : (
+        <ReactSortable
+          list={state.list}
+          setList={(newList) => (state.list = newList)}
+          onSort={onSort}
+          animation={200}
+          handle=".dragHandle"
+          className={classNames("grid gap-4 max-w-full", "min-[1180px]:grid-cols-2")}
+        >
+          {state.list.map((item) => {
+            const mode = Mode.from(item.key, item.mode);
 
-          return (
-            <ChordTable
-              key={item.id}
-              mode={mode}
-              onRemove={() => onRemove(item.id, mode)}
-            />
-          );
-        })}
-      </ReactSortable>
+            return (
+              <ChordTable
+                key={item.id}
+                mode={mode}
+                selectedChord={state.selectedChord}
+                onRemove={() => onRemove(item.id, mode)}
+              />
+            );
+          })}
+        </ReactSortable>
+      )}
 
       <Dialog
         visible={state.addItemDialog.show}

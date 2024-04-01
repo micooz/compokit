@@ -29,7 +29,7 @@ export function ToneLoader(props: ToneLoaderProps) {
   }
 
   if (state.loaded) {
-    return null;
+    return <div style={{ height: "0.3rem" }} />;
   }
 
   if (state.error) {

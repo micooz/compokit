@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useRef } from "react";
-import { Card } from "primereact/card";
+import classNames from "classnames";
 
 import { Chord, ChordTypeEnum, Mode } from "@/lib";
 import { ee } from "@/utils/ee";
@@ -15,11 +15,12 @@ import "./index.scss";
 
 export interface ChordTableProps {
   mode: Mode;
+  selectedChord?: Chord;
   onRemove?: () => void;
 }
 
 export function ChordTable(props: ChordTableProps) {
-  const { mode, onRemove } = props;
+  const { mode, selectedChord, onRemove } = props;
 
   const pianoRef = useRef<PianoKeyboardRef>(null);
 
@@ -85,9 +86,9 @@ export function ChordTable(props: ChordTableProps) {
       ));
 
     return (
-      <div className="flex flex-col justify-between">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center max-sm:flex-col max-sm:items-start">
+      <div className="flex flex-col justify-between pb-2">
+        <div className="flex justify-between items-center font-semibold">
+          <div className="flex items-center whitespace-nowrap max-sm:flex-col max-sm:items-start">
             <div className="flex items-center">
               <i
                 className="dragHandle pi pi-bars cursor-grab mr-3"
@@ -130,7 +131,9 @@ export function ChordTable(props: ChordTableProps) {
 
     return (
       <PercussionPad
-        className="px-2 py-1 flex items-center justify-between"
+        className={classNames("px-2 py-1 flex items-center justify-between", {
+          "bg-blue-300": selectedChord?.is(chord),
+        })}
         notes={notes}
         pianoRef={pianoRef}
       >
@@ -139,7 +142,10 @@ export function ChordTable(props: ChordTableProps) {
         </div>
         <TouchEvent onTouchStart={() => onAddChord(chord, step)}>
           <i
-            className="pi pi-plus p-1 hover:bg-gray-300 active:bg-gray-400"
+            className={classNames("p-1 hover:bg-gray-300 active:bg-gray-400", {
+              "pi pi-clone": !!selectedChord,
+              "pi pi-plus": !selectedChord,
+            })}
             style={{ fontSize: "0.8rem" }}
           />
         </TouchEvent>
@@ -148,7 +154,11 @@ export function ChordTable(props: ChordTableProps) {
   }
 
   return (
-    <Card className="chordTable relative select-none" title={<ModeTitle />}>
+    <div className="chordTable relative select-none overflow-auto p-4 border shadow-sm">
+      {/* title */}
+      <ModeTitle />
+
+      {/* keyboard */}
       <PianoKeyboard
         ref={pianoRef}
         className="mb-3 w-full"
@@ -158,6 +168,8 @@ export function ChordTable(props: ChordTableProps) {
         enabledKeys={modeKeys}
         dottedNotes={[modeKeys[0]]}
       />
+
+      {/* table */}
       <div className="overflow-auto">
         <table className="text-sm">
           <thead>
@@ -196,6 +208,6 @@ export function ChordTable(props: ChordTableProps) {
           </tbody>
         </table>
       </div>
-    </Card>
+    </div>
   );
 }

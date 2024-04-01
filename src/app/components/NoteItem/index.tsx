@@ -16,7 +16,7 @@ export function NoteItem(props: NoteItemProps) {
 
   const state = useReactive({
     highlight: "none" as "light" | "normal" | "dark" | "none",
-    showRelatedNotes: false,
+    showRelatedNotes: true,
   });
 
   ee.useEvent("SEARCH_NOTE", (keywords) => {

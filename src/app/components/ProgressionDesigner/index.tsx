@@ -7,6 +7,7 @@ import { confirmDialog } from "primereact/confirmdialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
+import { Skeleton } from "primereact/skeleton";
 
 import { Chord, Mode, Note, NoteArray } from "@/lib";
 import { ee } from "@/utils/ee";
@@ -15,7 +16,8 @@ import { PianoKeyboard, PianoKeyboardRef } from "@/components/PianoKeyboard";
 import { Sticky } from "@/components/Sticky";
 
 import { ProgressionItem } from "../ProgressionItem";
-import { ChordItem, Progression } from "./share";
+import { ChordItem, ProgressionVO } from "./share";
+import type { Progression } from "@/typings/storage";
 import "./index.scss";
 
 export interface ProgressionDesignerProps {
@@ -27,11 +29,12 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
   const state = useReactive({
     loaded: false,
-    isPin: false,
-    isPlaying: { status: false, progression: null as Progression | null },
+    isPin: true,
+    isPlaying: { status: false, progression: null as ProgressionVO | null },
     current: 0,
-    list: [] as Progression[],
+    list: [] as ProgressionVO[],
     showModeStepHint: false,
+    showChordTransformTools: false,
   });
 
   useMount(load);
@@ -44,12 +47,19 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
   function load() {
     // load progression list
-    const progressions = storage.progressions?.length
-      ? storage.progressions
-      : [{ name: "Progression 1", chords: [] }];
+    let progressions: Progression[] = [];
+
+    if (storage.progressions?.length) {
+      progressions = storage.progressions;
+    } else {
+      // add default item
+      progressions = [
+        { name: "Progression 1", chords: [], arrangement: "horizontal" },
+      ];
+    }
 
     state.list = progressions.map((item) => ({
-      ...item,
+      name: item.name,
       chords: item.chords.map((it) => ({
         chord: new Chord(it.chord),
         step: it.step,
@@ -57,15 +67,17 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
         omits: NoteArray.from(it.omits),
         octave: it.octave || 0,
         playing: false,
-        replacing: false,
+        selected: false,
         mode: it.mode ? Mode.from(it.mode.key, it.mode.type!) : undefined,
       })),
+      arrangement: item.arrangement || "horizontal",
     }));
 
     // load other config
     state.current = storage.currentProgressionIndex || 0;
-    state.isPin = storage.pinProgressionDesigner;
-    state.showModeStepHint = storage.showModeStepHint;
+    state.isPin = storage.pinProgressionDesigner ?? true;
+    state.showModeStepHint = storage.showModeStepHint ?? false;
+    state.showChordTransformTools = storage.showChordTransformTools ?? false;
 
     state.loaded = true;
   }
@@ -93,7 +105,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     }
 
     const notes = chord.chord
-      .inversion(chord.inversion)
+      .inverse(chord.inversion)
       .notes()
       .withGroup(3, { omits: chord.omits, octave: chord.octave })
       .names();
@@ -106,6 +118,11 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
   function onToggleShowModeStepHint(e: CheckboxChangeEvent) {
     state.showModeStepHint = !!e.checked;
     storage.showModeStepHint = state.showModeStepHint;
+  }
+
+  function onToggleShowChordTransformTools(e: CheckboxChangeEvent) {
+    state.showChordTransformTools = !!e.checked;
+    storage.showChordTransformTools = state.showChordTransformTools;
   }
 
   function onTogglePin() {
@@ -128,20 +145,54 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     state.list.push({
       name: `Progression ${state.list.length + 1}`,
       chords: [],
+      arrangement: "horizontal",
     });
     state.current = state.list.length - 1;
     save();
   }
 
-  function onRemoveProgression(index: number) {
-    state.list = state.list.filter((_, idx) => idx !== index);
-    state.current = Math.max(0, index - 1);
+  function onToggleArrangement(index: number) {
+    const progression = state.list[index];
+
+    if (!progression) {
+      return;
+    }
+
+    progression.arrangement =
+      progression.arrangement === "horizontal" ? "vertical" : "horizontal";
+
     save();
+  }
+
+  function onRemoveProgression(index: number) {
+    const progression = state.list[index];
+
+    if (!progression) {
+      return;
+    }
+
+    confirmDialog({
+      header: "Remove Progression",
+      message: (
+        <div>
+          Are you sure to remove:
+          <span className="inline-block mx-2 font-semibold">
+            {progression.name}
+          </span>
+          ?
+        </div>
+      ),
+      accept: () => {
+        state.list = state.list.filter((_, idx) => idx !== index);
+        state.current = Math.max(0, index - 1);
+        save();
+      },
+    });
   }
 
   // events for <ProgressionItem />
 
-  function onChangeName(index: number) {
+  function onRename(index: number) {
     if (state.isPlaying.status) {
       return;
     }
@@ -164,7 +215,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
         </div>
       ),
       accept: () => {
-        progression.name = name;
+        progression.name = name.trim();
         save();
       },
     });
@@ -176,14 +227,21 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     }
 
     const progression = state.list[index];
+    let { chords } = progression;
 
     state.isPlaying = { status: true, progression };
     state.current = index;
 
-    for (const chord of progression.chords) {
+    // play from selected chord
+    const fromIndex = progression.chords.findIndex((chord) => chord.selected);
+
+    if (fromIndex > -1) {
+      chords = chords.slice(Math.max(fromIndex, 0));
+    }
+
+    for (const chord of chords) {
       chord.playing = true;
       await playChord(chord, 1000);
-
       chord.playing = false;
 
       // set by onPause()
@@ -219,17 +277,17 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       omits: NoteArray.from([]),
       octave: 0,
       playing: false,
-      replacing: false,
+      selected: false,
       mode,
     };
 
-    const replacingChordIndex = currentProgression.chords.findIndex(
-      (item) => item.replacing
+    const selectedChordIndex = currentProgression.chords.findIndex(
+      (item) => item.selected
     );
 
-    if (replacingChordIndex > -1) {
-      newChord.replacing = true;
-      currentProgression.chords[replacingChordIndex] = newChord;
+    if (selectedChordIndex > -1) {
+      newChord.selected = true;
+      currentProgression.chords[selectedChordIndex] = newChord;
       playChord(newChord);
     } else {
       currentProgression.chords.push(newChord);
@@ -239,7 +297,12 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
   }
 
   function onRemoveChord(index: number) {
-    currentProgression.chords.splice(index, 1);
+    const deleted = currentProgression.chords.splice(index, 1);
+
+    if (deleted[0].selected) {
+      ee.emit("SELECT_CHORD", undefined);
+    }
+
     save();
   }
 
@@ -293,27 +356,29 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     save();
   }
 
-  function onToggleReplaceChord(index: number, replace: boolean) {
+  function onToggleSelectChord(index: number, selected: boolean) {
     const chord = currentProgression.chords[index];
 
     if (!chord) {
       return;
     }
 
-    // reset all replace checkbox
+    // reset all checkbox
     state.list.forEach((progression) => {
       progression.chords.forEach((chord) => {
-        chord.replacing = false;
+        chord.selected = false;
       });
     });
 
-    chord.replacing = replace;
+    chord.selected = selected;
+
+    ee.emit("SELECT_CHORD", selected ? chord.chord : undefined);
   }
 
   return (
     <Sticky
       disabled={!state.isPin}
-      className={classNames(className, "z-10 py-4 pb-2 bg-white shadow-md")}
+      className={classNames(className, "z-20 pb-2 bg-white max-xl:shadow-md")}
       offsetTop={50}
     >
       {/* title & pin */}
@@ -321,6 +386,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
         <span className="text-base font-bold border-l-4 pl-2 border-[#1174c0]">
           Progression Designer
         </span>
+
         <i
           className={classNames(
             "fa-regular fa-thumbtack cursor-pointer",
@@ -334,117 +400,156 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       <div className="flex justify-center">
         <PianoKeyboard
           ref={pianoRef}
-          className="mb-4 w-[800px]"
+          className="mb-4 w-full max-w-[44rem]"
           startNote="C3"
           endNote="B4"
           showLabelFor={["c", "blacks"]}
-          enabledKeys={[]}
           showHighlightNotesHint
         />
       </div>
 
       {/* options */}
-      <div className="flex items-center py-2">
-        <Checkbox
-          inputId="showModeStepHint"
-          onChange={onToggleShowModeStepHint}
-          checked={state.showModeStepHint}
-        />
-        <label
-          htmlFor="showModeStepHint"
-          className="text-xs ml-2 whitespace-nowrap"
-        >
-          Show Mode/Step Hint
-        </label>
+      <div className="py-2 flex gap-4 whitespace-nowrap">
+        <div className="flex items-center">
+          <Checkbox
+            inputId="showModeStepHint"
+            onChange={onToggleShowModeStepHint}
+            checked={state.showModeStepHint}
+          />
+          <label
+            htmlFor="showModeStepHint"
+            className="text-xs pl-2 cursor-pointer"
+          >
+            Show Mode/Step Hint
+          </label>
+        </div>
+
+        <div className="flex items-center">
+          <Checkbox
+            inputId="showChordTransformTools"
+            onChange={onToggleShowChordTransformTools}
+            checked={state.showChordTransformTools}
+          />
+          <label
+            htmlFor="showChordTransformTools"
+            className="text-xs pl-2 cursor-pointer"
+          >
+            Show Chord Tools
+          </label>
+        </div>
       </div>
 
       {/* progression list */}
-      <Accordion
-        className="mt-2"
-        // multiple
-        activeIndex={state.current}
-        onTabChange={(e) => onTabChange(e.index as number)}
-      >
-        {state.list.map((item, index) => (
-          <AccordionTab
-            key={index}
-            className="flex items-center"
-            header={
-              <div className="flex justify-between items-center select-none">
-                <div className="flex items-center gap-2">
-                  {/* title */}
-                  <span
-                    className="text-sm cursor-text"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onChangeName(index);
-                    }}
-                  >
-                    {item.name}
-                  </span>
-
-                  {/* play icon */}
-                  {(state.isPlaying.status === false ||
-                    state.isPlaying.progression?.name === item.name) && (
-                    <i
-                      className={classNames(
-                        "p-1 cursor-pointer hover:bg-gray-300 active:bg-gray-400",
-                        {
-                          "pi pi-play": !state.isPlaying.status,
-                          "pi pi-pause": state.isPlaying.status,
-                        }
-                      )}
-                      style={{ fontSize: "0.8rem" }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        state.isPlaying.status ? onPause() : onPlay(index);
-                      }}
-                    />
-                  )}
-                </div>
-
-                {/* remove icon */}
-                {!state.isPlaying.status && (
-                  <i
-                    className="pi pi-trash p-1 cursor-pointer hover:bg-gray-300 active:bg-gray-400"
-                    style={{ fontSize: "0.8rem" }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemoveProgression(index);
-                    }}
-                  />
-                )}
-              </div>
-            }
-          >
-            <ProgressionItem
-              id={index}
-              chords={item.chords}
-              pianoRef={pianoRef}
-              disabled={state.isPlaying.status}
-              showModeStepHint={state.showModeStepHint}
-              onInvertChord={onInvertChord}
-              onToggleOmitNote={onToggleOmitNote}
-              onToggleOctaveChord={onToggleOctaveChord}
-              onToggleReplaceChord={onToggleReplaceChord}
-              onRemoveChord={onRemoveChord}
-            />
-          </AccordionTab>
-        ))}
-      </Accordion>
-
-      {/* add button */}
-      {state.loaded && (
-        <div className={classNames("flex justify-center items-center mt-2")}>
-          <Button
-            label="Add Progression"
-            size="small"
-            icon="pi pi-plus"
-            text
-            onClick={onAddProgression}
-          />
+      {!state.loaded ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton width="100%" height="37px" />
+          <Skeleton width="70%" height="24px" />
+          <Skeleton width="80%" height="14px" />
         </div>
+      ) : (
+        <React.Fragment>
+          <Accordion
+            className="mt-2"
+            // multiple
+            activeIndex={state.current}
+            onTabChange={(e) => onTabChange(e.index as number)}
+          >
+            {state.list.map((item, index) => (
+              <AccordionTab
+                key={index}
+                className="flex items-center"
+                header={
+                  <div className="flex justify-between items-center select-none">
+                    <div className="flex items-center gap-2">
+                      {/* title */}
+                      <span
+                        className="text-sm cursor-text"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRename(index);
+                        }}
+                      >
+                        {item.name}
+                      </span>
+
+                      {/* play icon */}
+                      {(state.isPlaying.status === false ||
+                        state.isPlaying.progression?.name === item.name) && (
+                        <i
+                          className={classNames(
+                            "p-1 cursor-pointer hover:bg-gray-300 active:bg-gray-400",
+                            {
+                              "pi pi-play-circle": !state.isPlaying.status,
+                              "pi pi-pause-circle": state.isPlaying.status,
+                            }
+                          )}
+                          style={{ fontSize: "0.8rem" }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            state.isPlaying.status ? onPause() : onPlay(index);
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {/* icons */}
+                    <div className="flex items-center gap-1">
+                      <i
+                        className={classNames("pi pi-bars p-1 cursor-pointer", {
+                          "bg-[#3a7bd0] text-white":
+                            item.arrangement === "vertical",
+                        })}
+                        style={{ fontSize: "0.8rem" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onToggleArrangement(index);
+                        }}
+                      />
+                      {!state.isPlaying.status && (
+                        <i
+                          className="pi pi-trash p-1 cursor-pointer hover:bg-gray-300 active:bg-gray-400"
+                          style={{ fontSize: "0.8rem" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            onRemoveProgression(index);
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                }
+              >
+                <ProgressionItem
+                  id={index}
+                  progression={item}
+                  pianoRef={pianoRef}
+                  disabled={state.isPlaying.status}
+                  showModeStepHint={state.showModeStepHint}
+                  showChordTransformTools={state.showChordTransformTools}
+                  onInvertChord={onInvertChord}
+                  onToggleOmitNote={onToggleOmitNote}
+                  onToggleOctaveChord={onToggleOctaveChord}
+                  onToggleSelectChord={onToggleSelectChord}
+                  onRemoveChord={onRemoveChord}
+                />
+              </AccordionTab>
+            ))}
+          </Accordion>
+
+          {/* add button */}
+          <div className={classNames("flex justify-center items-center mt-2")}>
+            <Button
+              label="Add Progression"
+              size="small"
+              icon="pi pi-plus"
+              text
+              onClick={onAddProgression}
+            />
+          </div>
+        </React.Fragment>
       )}
     </Sticky>
   );

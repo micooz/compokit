@@ -12,7 +12,7 @@ export function Header(props: HeaderProps) {
   const {} = props;
 
   return (
-    <Sticky className="z-20 shadow-sm">
+    <Sticky className="z-30 shadow-sm">
       <MegaMenu
         className="flex justify-between items-center"
         model={[

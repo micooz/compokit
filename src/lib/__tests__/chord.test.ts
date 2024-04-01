@@ -20,13 +20,13 @@ test("Chord::new", () => {
   );
 });
 
-test("Chord::inversion", () => {
+test("Chord::inverse", () => {
   const chord = new Chord(["F", "A", "C"]);
-  expect(chord.inversion().join()).toBe("A C F");
+  expect(chord.inverse().join()).toBe("A C F");
 
   // with group
   const chord2 = new Chord(["G4", "B4", "D5", "F5"]);
-  expect(chord2.inversion(1).join()).toBe("B4 D5 F5 G5");
-  expect(chord2.inversion(2).join()).toBe("D5 F5 G5 B5");
-  expect(chord2.inversion(3).join()).toBe("F5 G5 B5 D6");
+  expect(chord2.inverse(1).join()).toBe("B4 D5 F5 G5");
+  expect(chord2.inverse(2).join()).toBe("D5 F5 G5 B5");
+  expect(chord2.inverse(3).join()).toBe("F5 G5 B5 D6");
 });

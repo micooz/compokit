@@ -1,4 +1,3 @@
-"use client";
 import React, { ReactNode } from "react";
 import StickyBox, { StickyBoxCompProps } from "react-sticky-box";
 
@@ -15,7 +14,11 @@ export function Sticky(props: StickyProps) {
   }
 
   return (
-    <StickyBox className={className} {...stickyBoxProps}>
+    <StickyBox
+      className={className}
+      style={{ alignSelf: "flex-start", ...stickyBoxProps.style }}
+      {...stickyBoxProps}
+    >
       {children}
     </StickyBox>
   );

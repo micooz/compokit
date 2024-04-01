@@ -1,5 +1,5 @@
 import { Chord, ChordTypeEnum } from "./chord";
-import { transformObject } from "./common";
+import { range, transformObject } from "./common";
 import { Inter, Interval } from "./interval";
 import {
   AccidentalEnum,
@@ -27,55 +27,6 @@ export enum ModeEnum {
   Aeolian,
   Locrian,
 }
-
-const majorKeys = [
-  "C",
-  "G",
-  "D",
-  "A",
-  "E",
-  "B",
-  "F",
-  "B♭",
-  "E♭",
-  "A♭",
-  "D♭",
-  "G♭",
-];
-
-const minorKeys = [
-  "A",
-  "E",
-  "B",
-  "F♯",
-  "C♯",
-  "G♯",
-  "D",
-  "G",
-  "C",
-  "F",
-  "B♭",
-  "D♯",
-];
-
-const modeEnumToKeys: Record<ModeEnum, string[]> = {
-  [ModeEnum.NaturalMajor]: majorKeys,
-  [ModeEnum.HarmonicMajor]: majorKeys,
-  [ModeEnum.MelodicMajor]: majorKeys,
-
-  [ModeEnum.NaturalMinor]: minorKeys,
-  [ModeEnum.HarmonicMinor]: minorKeys,
-  [ModeEnum.MelodicMinor]: minorKeys,
-
-  // TODO:
-  [ModeEnum.Ionian]: majorKeys,
-  [ModeEnum.Dorian]: [],
-  [ModeEnum.Phrygian]: [],
-  [ModeEnum.Lydian]: [],
-  [ModeEnum.Mixolydian]: [],
-  [ModeEnum.Aeolian]: minorKeys,
-  [ModeEnum.Locrian]: [],
-};
 
 const majorMinorRelations: Record<number, ModeEnum> = {
   [ModeEnum.NaturalMajor]: ModeEnum.NaturalMinor,
@@ -180,13 +131,35 @@ export class Mode {
   }
 
   static getKeys(mode: ModeEnum) {
-    const keys = modeEnumToKeys[mode];
+    const allKeys = range("C", "B", "both").reduce<Note[]>(
+      (acc, next) => acc.concat(next.valueOf()),
+      []
+    );
 
-    if (!keys) {
-      throw new Error(`unsupported mode: ${mode}`);
-    }
+    // exclude double flat and double sharp key
+    // exclude all flat and all sharp key
+    const filteredKeys = allKeys.filter((key) => {
+      const notes = Mode.from(key, mode).notes().valueOf();
 
-    return keys;
+      let count = 0;
+
+      for (const note of notes) {
+        if (note.isDoubleFlat() || note.isDoubleSharp()) {
+          return false;
+        }
+        if (!note.isNature()) {
+          count += 1;
+        }
+      }
+
+      if (count === notes.length) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return NoteArray.from(filteredKeys);
   }
 
   key() {

@@ -2,18 +2,18 @@ import "client-only";
 import store from "store2";
 
 import type { ModeItem } from "@/app/components/ModeList/share";
-import type { ProgressionItem } from "@/typings/storage";
+import type { Progression } from "@/typings/storage";
 
 class Storage {
   private prefix = "compokit";
 
   // progression
 
-  get progressions(): ProgressionItem[] | undefined {
+  get progressions(): Progression[] | undefined {
     return this.getData("progression", "list");
   }
 
-  set progressions(items: ProgressionItem[]) {
+  set progressions(items: Progression[]) {
     this.setData("progression", "list", items);
   }
 
@@ -39,6 +39,14 @@ class Storage {
 
   set showModeStepHint(show: boolean) {
     this.setData("progression", "showModeStepHint", show);
+  }
+
+  get showChordTransformTools() {
+    return this.getData("progression", "showChordTransformTools");
+  }
+
+  set showChordTransformTools(show: boolean) {
+    this.setData("progression", "showChordTransformTools", show);
   }
 
   // mode

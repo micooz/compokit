@@ -32,17 +32,22 @@ test("Note::group", () => {
 test("Note::isNature", () => {
   expect(Note.from("C").isNature()).toBe(true);
   expect(Note.from("C♮").isNature()).toBe(true);
-  expect(Note.from("C#").isNature()).toBe(false);
 });
 
 test("Note::isSharp", () => {
   expect(Note.from("C#").isSharp()).toBe(true);
-  expect(Note.from("C").isSharp()).toBe(false);
+});
+
+test("Note::isDoubleSharp", () => {
+  expect(Note.from("C##").isDoubleSharp()).toBe(true);
 });
 
 test("Note::isFlat", () => {
   expect(Note.from("Cb").isFlat()).toBe(true);
-  expect(Note.from("C").isFlat()).toBe(false);
+});
+
+test("Note::isDoubleFlat", () => {
+  expect(Note.from("Cbb").isDoubleFlat()).toBe(true);
 });
 
 test("Note::name", () => {

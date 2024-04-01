@@ -242,10 +242,13 @@ export const PianoKeyboard = React.forwardRef<
           "relative",
           "flex items-end flex-1 border-[2px] border-black -ml-[2px]",
           "text-black bg-white",
-          disabled && "disabled",
-          playing && "playing",
-          hover && "hover",
-          dim && "dim"
+
+          {
+            disabled: disabled,
+            playing: playing,
+            hover: hover,
+            dim: dim,
+          }
         )}
         onTouchStart={() => {
           if (disabled) {
@@ -306,12 +309,14 @@ export const PianoKeyboard = React.forwardRef<
             "left-[83.00%]": nextA.is("A#") || nextB.is("Bb"),
           },
           "flex items-end justify-center flex-1",
-          "bg-black text-white",
+          "bg-black text-white shadow-sm",
           "rounded-bl-[4px] rounded-br-[4px]",
-          disabled && "disabled",
-          playing && "playing",
-          hover && "hover",
-          dim && "dim"
+          {
+            disabled: disabled,
+            playing: playing,
+            hover: hover,
+            dim: dim,
+          }
         )}
         onTouchStart={() => {
           if (disabled) {

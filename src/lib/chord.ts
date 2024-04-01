@@ -1,4 +1,4 @@
-import { Note, NoteToNameOptions, Notes } from "./note";
+import { Note, NoteIsOptions, NoteToNameOptions, Notes } from "./note";
 import { NoteArray } from "./note-array";
 
 export enum ChordTypeEnum {
@@ -33,6 +33,11 @@ const degreeSeqToInversionAndRootIndex: Record<string, [number, number]> = {
   "3-3-2": [1, 3], // E G B C
   "3-2-3": [2, 2], // G B C E
   "2-3-3": [3, 1], // B C E G
+};
+
+export type ChordIsOptions = {
+  checkInversion?: boolean;
+  nodeIsOptions?: NoteIsOptions;
 };
 
 export class Chord {
@@ -85,7 +90,7 @@ export class Chord {
     //
   }
 
-  inversion(ordinal = 1) {
+  inverse(ordinal = 1) {
     const backward = ordinal < 0;
     const notes = this._noteArr.clone().valueOf();
 
@@ -112,7 +117,7 @@ export class Chord {
     return new Chord(notes);
   }
 
-  inversionOrdinal() {
+  inversion() {
     return this._inversion;
   }
 
@@ -121,7 +126,7 @@ export class Chord {
       return this.clone();
     }
 
-    return this.inversion(-this._inversion);
+    return this.inverse(-this._inversion);
   }
 
   toAbbr(opts?: NoteToNameOptions) {
@@ -131,7 +136,7 @@ export class Chord {
     const root = this._root.name(opts);
 
     // chord in root position
-    const inRootPosition = this.inversion(-this._inversion);
+    const inRootPosition = this.inverse(-this._inversion);
 
     // quality sequence
     const qualitySeq = inRootPosition
@@ -186,6 +191,25 @@ export class Chord {
 
   join(separator = " ", opts?: NoteToNameOptions) {
     return this._noteArr.join(separator, opts);
+  }
+
+  is(chord: Chord, opts?: ChordIsOptions) {
+    const { checkInversion, nodeIsOptions } = opts || {};
+
+    const notesA = this.notes();
+    const notesB = chord.notes();
+
+    if (notesA.count() !== notesB.count()) {
+      return false;
+    }
+    if (checkInversion && this.inversion() !== chord.inversion()) {
+      return false;
+    }
+
+    return notesA.valueOf().every((noteA, index) => {
+      const noteB = notesB.get(index)!;
+      return noteA.is(noteB, opts?.nodeIsOptions);
+    });
   }
 
   clone() {

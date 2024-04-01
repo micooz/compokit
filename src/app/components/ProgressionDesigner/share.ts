@@ -1,8 +1,9 @@
 import type { Chord, Mode, NoteArray } from "@/lib";
 
-export type Progression = {
+export type ProgressionVO = {
   name: string;
   chords: ChordItem[];
+  arrangement: "horizontal" | "vertical";
 };
 
 export type ChordItem = {
@@ -12,6 +13,6 @@ export type ChordItem = {
   omits: NoteArray;
   octave: 0 | 8 | -8;
   playing: boolean;
-  replacing: boolean;
+  selected: boolean;
   mode?: Mode;
 };

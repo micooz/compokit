@@ -4,7 +4,6 @@ import classNames from "classnames";
 import { useMount, useReactive } from "ahooks";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
-import { Skeleton } from "primereact/skeleton";
 
 import { ee } from "@/utils/ee";
 import { storage } from "@/utils/storage";
@@ -17,14 +16,16 @@ export function ModeListOptions(props: ModeListOptionsProps) {
   const { className } = props;
 
   const state = useReactive({
-    showRelatedNotes: false,
+    showRelatedNotes: true,
     searchNote: "",
     loaded: false,
   });
 
   useMount(() => {
-    state.showRelatedNotes = storage.showRelatedNotes || false;
+    state.showRelatedNotes = storage.showRelatedNotes ?? true;
     state.loaded = true;
+
+    ee.emit("TOGGLE_SHOW_RELATED_NOTES", state.showRelatedNotes);
   });
 
   function refresh() {
@@ -76,14 +77,6 @@ export function ModeListOptions(props: ModeListOptionsProps) {
     ee.emit("SEARCH_NOTE", keywords);
   });
 
-  if (!state.loaded) {
-    return (
-      <React.Fragment>
-        <Skeleton width="100%" height="37px" />
-      </React.Fragment>
-    );
-  }
-
   return (
     <div className={classNames("flex flex-wrap gap-4 py-2", className)}>
       <div className="flex items-center">
@@ -94,29 +87,31 @@ export function ModeListOptions(props: ModeListOptionsProps) {
         />
         <label
           htmlFor="showRelatedNotes"
-          className="text-xs ml-2 whitespace-nowrap"
+          className="text-xs pl-2 whitespace-nowrap cursor-pointer"
         >
           Show Related Notes
         </label>
       </div>
 
-      <div className="p-input-icon-left max-sm:w-full">
-        <i className="pi pi-search" />
-        <InputText
-          id="search-note-input"
-          value={state.searchNote}
-          onChange={onSearchNote}
-          placeholder="Search note..."
-          className="p-inputtext-sm w-full"
-          style={{ paddingRight: state.searchNote ? 16 : "auto" }}
-        />
-        {state.searchNote && (
-          <i
-            className="pi pi-times cursor-pointer -ml-6"
-            onClick={onClearSearch}
+      {state.loaded && (
+        <div className="p-input-icon-left max-sm:w-full">
+          <i className="pi pi-search" />
+          <InputText
+            id="search-note-input"
+            value={state.searchNote}
+            onChange={onSearchNote}
+            placeholder="Search note..."
+            className="p-inputtext-sm w-full"
+            style={{ paddingRight: state.searchNote ? 16 : "auto" }}
           />
-        )}
-      </div>
+          {state.searchNote && (
+            <i
+              className="pi pi-times cursor-pointer -ml-6"
+              onClick={onClearSearch}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Note } from "./note";
+import { Note, NoteType } from "./note";
 import { NoteArray } from "./note-array";
 
 export function transformObject<T, R>(
@@ -29,8 +29,8 @@ export function dedupBy<T>(arr: T[], func: (item: T) => any) {
 }
 
 export function range(
-  from: Note | string,
-  to: Note | string,
+  from: NoteType,
+  to: NoteType,
   accidental: "sharp" | "flat" | "both" = "sharp"
 ) {
   const list = [

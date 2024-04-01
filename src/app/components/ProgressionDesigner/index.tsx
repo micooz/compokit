@@ -289,12 +289,12 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       newChord.selected = true;
       currentProgression.chords[selectedChordIndex] = newChord;
       playChord(newChord);
+
+      // reselect replaced chord
+      ee.emit("SELECT_CHORD", newChord.chord);
     } else {
       currentProgression.chords.push(newChord);
     }
-
-    // reselect replaced chord
-    ee.emit("SELECT_CHORD", newChord.chord);
 
     save();
   }

@@ -200,8 +200,16 @@ export class Note {
     return this._accidental === AccidentalEnum.Sharp;
   }
 
+  isDoubleSharp() {
+    return this._accidental === AccidentalEnum.DoubleSharp;
+  }
+
   isFlat() {
     return this._accidental === AccidentalEnum.Flat;
+  }
+
+  isDoubleFlat() {
+    return this._accidental === AccidentalEnum.DoubleFlat;
   }
 
   clone() {

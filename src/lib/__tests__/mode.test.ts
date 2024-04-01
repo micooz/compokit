@@ -48,8 +48,10 @@ test("Mode:modes", () => {
 });
 
 test("Mode:getKeys", () => {
-  expect(Mode.getKeys(ModeEnum.NaturalMajor)).toMatchSnapshot();
-  expect(() => Mode.getKeys(-1 as any)).toThrow("unsupported mode: -1");
+  expect(
+    Mode.getKeys(ModeEnum.NaturalMajor).names({ transformAccidental: true })
+  ).toMatchSnapshot();
+  expect(() => Mode.getKeys(-1 as any)).toThrow("unknown mode: -1");
 });
 
 test("Mode:key", () => {
@@ -128,4 +130,37 @@ test("Mode::name", () => {
 test("Mode::notes", () => {
   const mode = new Mode([Note.from("C"), Note.from("Eb")]);
   expect(mode.notes().join()).toBe("C Eb");
+});
+
+test("getKeys", () => {
+  expect(Mode.getKeys(ModeEnum.NaturalMajor).names()).toEqual([
+    "C",
+    "Db",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "Gb",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ]);
+
+  expect(Mode.getKeys(ModeEnum.HarmonicMinor).names()).toEqual([
+    "C",
+    "C#",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ]);
 });

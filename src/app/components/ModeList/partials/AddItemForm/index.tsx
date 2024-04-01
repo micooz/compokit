@@ -29,7 +29,7 @@ export function AddItemForm(props: AddItemFormProps) {
 
   const modeOptions = useMemo(() => Mode.modes(), []);
   const keyOptions = useMemo(
-    () => Mode.getKeys(state.selectedMode),
+    () => Mode.getKeys(state.selectedMode).names({ transformAccidental: true }),
     [state.selectedMode]
   );
 

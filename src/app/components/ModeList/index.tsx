@@ -30,6 +30,7 @@ export function ModeList(props: ModeListProps) {
     loaded: false,
     addItemDialog: { show: false },
     selectedChord: undefined as Chord | undefined,
+    insertChord: false,
   });
 
   useMount(() => {
@@ -46,6 +47,10 @@ export function ModeList(props: ModeListProps) {
 
   ee.useEvent("SELECT_CHORD", (chord) => {
     state.selectedChord = chord;
+  });
+
+  ee.useEvent("INSERT_CHORD", (index) => {
+    state.insertChord = index !== -1;
   });
 
   function onSort() {
@@ -117,6 +122,7 @@ export function ModeList(props: ModeListProps) {
                 key={item.id}
                 mode={mode}
                 selectedChord={state.selectedChord}
+                insertChord={state.insertChord}
                 onRemove={() => onRemove(item.id, mode)}
               />
             );

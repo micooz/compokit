@@ -16,11 +16,12 @@ import "./index.scss";
 export interface ChordTableProps {
   mode: Mode;
   selectedChord?: Chord;
+  insertChord?: boolean;
   onRemove?: () => void;
 }
 
 export function ChordTable(props: ChordTableProps) {
-  const { mode, selectedChord, onRemove } = props;
+  const { mode, selectedChord, insertChord, onRemove } = props;
 
   const pianoRef = useRef<PianoKeyboardRef>(null);
 
@@ -129,6 +130,8 @@ export function ChordTable(props: ChordTableProps) {
     const abbr = chord.toAbbr({ transformAccidental: true });
     const notes = useMemo(() => chord.notes().withGroup(3).names(), [chord]);
 
+    const showCloneIcon = !!selectedChord; // || insertChord;
+
     return (
       <PercussionPad
         className={classNames("px-2 py-1 flex items-center justify-between", {
@@ -143,8 +146,8 @@ export function ChordTable(props: ChordTableProps) {
         <TouchEvent onTouchStart={() => onAddChord(chord, step)}>
           <i
             className={classNames("p-1 hover:bg-gray-300 active:bg-gray-400", {
-              "pi pi-clone": !!selectedChord,
-              "pi pi-plus": !selectedChord,
+              "pi pi-clone": showCloneIcon,
+              "pi pi-plus": !showCloneIcon,
             })}
             style={{ fontSize: "0.8rem" }}
           />

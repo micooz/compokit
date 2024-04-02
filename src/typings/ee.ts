@@ -5,6 +5,7 @@ export type EventName =
   | "SEARCH_NOTE"
   | "SELECT_NOTE"
   | "SELECT_CHORD"
+  | "INSERT_CHORD"
   | "ADD_CHORD";
 
 export type EventArgs = {
@@ -12,5 +13,6 @@ export type EventArgs = {
   SEARCH_NOTE: string;
   SELECT_NOTE: string;
   SELECT_CHORD: Chord | undefined;
+  INSERT_CHORD: number;
   ADD_CHORD: { chord: Chord; step: number; mode: Mode };
 };

@@ -279,7 +279,7 @@ export class Note {
         : this._group + Math.floor((nextNoteAbs - 1) / 7);
 
     // decide next note's accidental
-    const diff = interval.halfStepCount - this.to(nextNote).halfStepCount;
+    const diff = interval.semitones - this.to(nextNote).semitones;
 
     const accidental = {
       [-2]: AccidentalEnum.DoubleFlat,
@@ -319,7 +319,7 @@ export class Note {
         : this._group + Math.floor((nextNoteAbs - 1) / 7);
 
     // decide next note's accidental
-    const diff = interval.halfStepCount - nextNote.to(this).halfStepCount;
+    const diff = interval.semitones - nextNote.to(this).semitones;
 
     const accidental = {
       [2]: AccidentalEnum.DoubleFlat,
@@ -365,10 +365,8 @@ export class Note {
     // consider target note's accidental
     semitones += accidentalOffsetMap[note.accidental];
 
-    // in case C# to C is -1
-    if (semitones === -1) {
-      semitones = 1;
-    }
+    // in case C# to C is -1, G# to Gb is -2
+    semitones = Math.abs(semitones);
 
     return Interval.fromDegreeAndSemitones(degree, semitones);
   }

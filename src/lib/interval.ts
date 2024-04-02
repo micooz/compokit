@@ -1,19 +1,23 @@
 import { Degree } from "./degree";
 import { Quality } from "./quality";
 
-const halfStepCountMap: Record<string, number> = {
+const intervalToSemitonesMap: Record<string, number> = {
+  S1: 1, // only one semitone
+  d1: 2,
   P1: 0,
-  S1: 1, // special case: only one semitone
 
   d2: 0,
   m2: 1,
   M2: 2,
   A2: 3,
+  AA2: 4,
 
+  dd3: 1,
   d3: 2,
   m3: 3,
   M3: 4,
   A3: 5,
+  AA3: 6,
 
   dd4: 3,
   d4: 4,
@@ -27,29 +31,32 @@ const halfStepCountMap: Record<string, number> = {
   A5: 8,
   AA5: 9,
 
+  dd6: 6,
   d6: 7,
   m6: 8,
   M6: 9,
   A6: 10,
+  AA6: 11,
 
+  dd7: 8,
   d7: 9,
   m7: 10,
   M7: 11,
   A7: 12,
+  AA7: 13,
 
   P8: 12,
 };
 
 // '1_0': 'P1',
 // '2_1': 'm2',
-const degreeHalfStepCountToAbbr = Object.entries(halfStepCountMap).reduce(
-  (acc, [key, value]) => {
-    const newKey = `${key.slice(-1)}_${value}`;
-    acc[newKey] = key;
-    return acc;
-  },
-  {} as Record<string, string>
-);
+const degreeSemitonesCountToAbbr = Object.entries(
+  intervalToSemitonesMap
+).reduce((acc, [key, value]) => {
+  const newKey = `${key.slice(-1)}_${value}`;
+  acc[newKey] = key;
+  return acc;
+}, {} as Record<string, string>);
 
 export class Interval {
   private _quality: Quality;
@@ -74,9 +81,6 @@ export class Interval {
     const n = Number(num);
     const degree = Degree.fromNumber(n);
 
-    if (n === 1 && !quality.isPerfect() && !quality.isSemitone()) {
-      throw new Error("only perfect unison(P1) or semitone(S1) is valid");
-    }
     if (n === 8 && !quality.isPerfect()) {
       throw new Error("only perfect octave(P8) is valid");
     }
@@ -91,9 +95,10 @@ export class Interval {
 
   static fromDegreeAndSemitones(degree: number, semitones: number) {
     const key = `${degree}_${semitones}`;
-    const abbr = degreeHalfStepCountToAbbr[key];
+    const abbr = degreeSemitonesCountToAbbr[key];
 
     if (!abbr) {
+      debugger;
       throw new Error(
         `cannot determine interval from degree = ${degree} and semitones = ${semitones}`
       );
@@ -110,8 +115,8 @@ export class Interval {
     return this._degree;
   }
 
-  get halfStepCount() {
-    return halfStepCountMap[this.toAbbr()]!;
+  get semitones() {
+    return intervalToSemitonesMap[this.toAbbr()]!;
   }
 
   is(source: Inter) {
@@ -121,8 +126,8 @@ export class Interval {
     return source.toAbbr() === this.toAbbr();
   }
 
-  isHalfStep() {
-    const count = this.halfStepCount;
+  isSemitone() {
+    const count = this.semitones;
     return count === 1 || count === 11;
   }
 

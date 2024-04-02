@@ -30,7 +30,6 @@ export function ModeList(props: ModeListProps) {
     loaded: false,
     addItemDialog: { show: false },
     selectedChord: undefined as Chord | undefined,
-    insertChord: false,
   });
 
   useMount(() => {
@@ -47,10 +46,6 @@ export function ModeList(props: ModeListProps) {
 
   ee.useEvent("SELECT_CHORD", (chord) => {
     state.selectedChord = chord;
-  });
-
-  ee.useEvent("INSERT_CHORD", (index) => {
-    state.insertChord = index !== -1;
   });
 
   function onSort() {
@@ -112,7 +107,11 @@ export function ModeList(props: ModeListProps) {
           onSort={onSort}
           animation={200}
           handle=".dragHandle"
-          className={classNames("grid gap-4 max-w-full", "min-[1180px]:grid-cols-2")}
+          className={classNames(
+            "grid gap-4 max-w-full",
+            "min-[2200px]:grid-cols-3",
+            "min-[1180px]:grid-cols-2"
+          )}
         >
           {state.list.map((item) => {
             const mode = Mode.from(item.key, item.mode);
@@ -122,7 +121,6 @@ export function ModeList(props: ModeListProps) {
                 key={item.id}
                 mode={mode}
                 selectedChord={state.selectedChord}
-                insertChord={state.insertChord}
                 onRemove={() => onRemove(item.id, mode)}
               />
             );
@@ -133,8 +131,9 @@ export function ModeList(props: ModeListProps) {
       <Dialog
         visible={state.addItemDialog.show}
         onHide={() => (state.addItemDialog.show = false)}
+        blockScroll
         header="New Table"
-        style={{ width: "300px" }}
+        className="max-sm:w-[70vw] w-[20rem]"
       >
         <AddItemForm list={state.list} onSubmit={onAdd} />
       </Dialog>

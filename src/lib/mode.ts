@@ -11,14 +11,14 @@ import {
 import { NoteArray } from "./note-array";
 
 export enum ModeEnum {
+  // major and minor
   NaturalMajor,
   HarmonicMajor,
   MelodicMajor,
-
   NaturalMinor,
   HarmonicMinor,
   MelodicMinor,
-
+  // church mode
   Ionian,
   Dorian,
   Phrygian,
@@ -26,34 +26,50 @@ export enum ModeEnum {
   Mixolydian,
   Aeolian,
   Locrian,
+  // jazz
+  MajorBlues,
+  MinorBlues,
+  JazzMelodicMinor,
+  JazzHarmonicMinor,
+  Bebop,
+  Diminished,
 }
 
 const majorMinorRelations: Record<number, ModeEnum> = {
   [ModeEnum.NaturalMajor]: ModeEnum.NaturalMinor,
   [ModeEnum.HarmonicMajor]: ModeEnum.HarmonicMinor,
   [ModeEnum.MelodicMajor]: ModeEnum.MelodicMinor,
-
   [ModeEnum.NaturalMinor]: ModeEnum.NaturalMajor,
   [ModeEnum.HarmonicMinor]: ModeEnum.HarmonicMajor,
   [ModeEnum.MelodicMinor]: ModeEnum.MelodicMajor,
 };
 
-const modeEnumToString: Record<ModeEnum, string> = {
-  [ModeEnum.NaturalMajor]: "Natural Major",
-  [ModeEnum.HarmonicMajor]: "Harmonic Major",
-  [ModeEnum.MelodicMajor]: "Melodic Major",
-
-  [ModeEnum.NaturalMinor]: "Natural Minor",
-  [ModeEnum.HarmonicMinor]: "Harmonic Minor",
-  [ModeEnum.MelodicMinor]: "Melodic Minor",
-
-  [ModeEnum.Ionian]: "Ionian", // same as ModeEnum.NaturalMajor
-  [ModeEnum.Dorian]: "Dorian",
-  [ModeEnum.Phrygian]: "Phrygian",
-  [ModeEnum.Lydian]: "Lydian",
-  [ModeEnum.Mixolydian]: "Mixolydian",
-  [ModeEnum.Aeolian]: "Aeolian", // same as ModeEnum.NaturalMinor
-  [ModeEnum.Locrian]: "Locrian",
+const modeGroups: Record<string, Partial<Record<ModeEnum, string>>> = {
+  "Major and Minor": {
+    [ModeEnum.NaturalMajor]: "Natural Major",
+    [ModeEnum.HarmonicMajor]: "Harmonic Major",
+    [ModeEnum.MelodicMajor]: "Melodic Major",
+    [ModeEnum.NaturalMinor]: "Natural Minor",
+    [ModeEnum.HarmonicMinor]: "Harmonic Minor",
+    [ModeEnum.MelodicMinor]: "Melodic Minor",
+  },
+  "Church Mode": {
+    [ModeEnum.Ionian]: "Ionian", // same as ModeEnum.NaturalMajor
+    [ModeEnum.Dorian]: "Dorian",
+    [ModeEnum.Phrygian]: "Phrygian",
+    [ModeEnum.Lydian]: "Lydian",
+    [ModeEnum.Mixolydian]: "Mixolydian",
+    [ModeEnum.Aeolian]: "Aeolian", // same as ModeEnum.NaturalMinor
+    [ModeEnum.Locrian]: "Locrian",
+  },
+  Jazz: {
+    // [ModeEnum.MajorBlues]: "Major Blues",
+    // [ModeEnum.MinorBlues]: "Minor Blues",
+    [ModeEnum.JazzMelodicMinor]: "Melodic Minor (Jazz)",
+    [ModeEnum.JazzHarmonicMinor]: "Harmonic Minor (Jazz)",
+    // [ModeEnum.Bebop]: "Bebop",
+    // [ModeEnum.Diminished]: "Diminished",
+  },
 };
 
 const chordTypeEnumToIndexes: Record<ChordTypeEnum, number[]> = {
@@ -66,14 +82,14 @@ const chordTypeEnumToIndexes: Record<ChordTypeEnum, number[]> = {
 
 const modeToIntervals = transformObject(
   {
+    // major and minor
     [ModeEnum.NaturalMajor]: ["P1", "M2", "M3", "P4", "P5", "M6", "M7"],
     [ModeEnum.HarmonicMajor]: ["P1", "M2", "M3", "P4", "P5", "m6", "M7"],
     [ModeEnum.MelodicMajor]: ["P1", "M2", "M3", "P4", "P5", "m6", "m7"],
-
     [ModeEnum.NaturalMinor]: ["P1", "M2", "m3", "P4", "P5", "m6", "m7"],
     [ModeEnum.HarmonicMinor]: ["P1", "M2", "m3", "P4", "P5", "m6", "M7"],
     [ModeEnum.MelodicMinor]: ["P1", "M2", "m3", "P4", "P5", "M6", "M7"],
-
+    // church mode
     [ModeEnum.Ionian]: ["P1", "M2", "M3", "P4", "P5", "M6", "M7"], // same as ModeEnum.NaturalMajor
     [ModeEnum.Dorian]: ["P1", "M2", "m3", "P4", "P5", "M6", "m7"],
     [ModeEnum.Phrygian]: ["P1", "m2", "m3", "P4", "P5", "m6", "m7"],
@@ -81,6 +97,13 @@ const modeToIntervals = transformObject(
     [ModeEnum.Mixolydian]: ["P1", "M2", "M3", "P4", "P5", "M6", "m7"],
     [ModeEnum.Aeolian]: ["P1", "M2", "m3", "P4", "P5", "m6", "m7"], // same as ModeEnum.NaturalMinor
     [ModeEnum.Locrian]: ["P1", "m2", "m3", "P4", "d5", "m6", "m7"],
+    // jazz
+    [ModeEnum.MajorBlues]: ["P1", "M2", "m3", "M3", "P5", "M6"],
+    [ModeEnum.MinorBlues]: ["P1", "m3", "P4", "d5", "P5", "m7"],
+    [ModeEnum.JazzMelodicMinor]: ["P1", "M2", "m3", "P4", "P5", "M6", "M7"],
+    [ModeEnum.JazzHarmonicMinor]: ["P1", "M2", "m3", "P4", "P5", "m6", "M7"],
+    [ModeEnum.Bebop]: ["P1", "M2", "M3", "P4", "P5", "M6", "m7", "M7"],
+    [ModeEnum.Diminished]: ["P1", "M2", "m3", "P4", "d5", "m6", "M6", "M7"],
   },
   (_, abbrs) => abbrs.map((abbr) => Interval.from(abbr))
 );
@@ -124,9 +147,12 @@ export class Mode {
   }
 
   static modes() {
-    return Object.entries(modeEnumToString).map(([key, value]) => ({
-      label: value,
-      value: Number(key) as ModeEnum,
+    return Object.entries(modeGroups).map(([group, map]) => ({
+      group,
+      items: Object.entries(map).map(([key, value]) => ({
+        label: value,
+        value: Number(key) as ModeEnum,
+      })),
     }));
   }
 
@@ -170,12 +196,14 @@ export class Mode {
     return this._mode;
   }
 
-  chord(step: number, type?: ChordTypeEnum) {
-    if (step < 1 || step > 7) {
-      throw new Error("step must be between 1 and 7");
+  chord(step: number, type: ChordTypeEnum) {
+    const count = this._noteArr.count();
+
+    if (step < 1 || step > count) {
+      throw new Error(`step must be between 1 and ${count}`);
     }
 
-    const indexes = chordTypeEnumToIndexes[type || ChordTypeEnum.Triad];
+    const indexes = chordTypeEnumToIndexes[type];
 
     if (!indexes) {
       throw new Error(`unknown chord type: ${type}`);
@@ -184,13 +212,13 @@ export class Mode {
     const notes = indexes.map((index) => {
       const idxAbs = step + index - 1;
 
-      let idx = idxAbs % 7;
-      idx = idx < 1 ? idx + 7 : idx;
+      let idx = idxAbs % count;
+      idx = idx < 1 ? idx + count : idx;
 
       const note = this._noteArr.get(idx - 1)!;
 
       if (note.group) {
-        note.group += Math.floor((idxAbs - 1) / 7);
+        note.group += Math.floor((idxAbs - 1) / count);
       }
 
       return note;
@@ -243,10 +271,17 @@ export class Mode {
   name(opts?: ModeNameOptions) {
     const root = this._noteArr.root().name(opts);
 
-    let mode =
-      typeof this._mode === "undefined"
-        ? "Unknown Mode"
-        : modeEnumToString[this._mode];
+    let mode = "";
+
+    if (this._mode === undefined) {
+      mode = "Unknown Mode";
+    } else {
+      const map = Object.values(modeGroups).reduce((acc, next) => {
+        return { ...acc, ...next };
+      }, {});
+
+      mode = map[this._mode!] || "Unknown Mode";
+    }
 
     if (opts?.shortName) {
       mode = mode

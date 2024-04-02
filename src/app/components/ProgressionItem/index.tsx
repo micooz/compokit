@@ -279,7 +279,7 @@ function Chord(props: ChordProps) {
       <div>
         <i
           className={classNames(
-            "fa-solid fa-add mt-7 mx-1 p-1 text-sm border",
+            "fa-solid fa-add mt-5 mx-1 p-1 text-sm border",
             "cursor-pointer text-gray-300 hover:text-gray-500",
             {
               "border-transparent": progression.insertIndex !== index,

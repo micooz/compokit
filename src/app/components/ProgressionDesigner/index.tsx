@@ -340,7 +340,6 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     currentProgression.insertIndex = newIndex;
 
     ee.emit("SELECT_CHORD", undefined);
-    ee.emit("INSERT_CHORD", newIndex);
   }
 
   function onInvertChord(index: number) {
@@ -449,7 +448,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       </div>
 
       {/* options */}
-      <div className="py-2 flex gap-4 whitespace-nowrap">
+      <div className="py-2 flex flex-wrap gap-4">
         <div className="flex items-center">
           <Checkbox
             inputId="showModeStepHint"

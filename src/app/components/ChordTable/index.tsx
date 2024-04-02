@@ -16,20 +16,19 @@ import "./index.scss";
 export interface ChordTableProps {
   mode: Mode;
   selectedChord?: Chord;
-  insertChord?: boolean;
   onRemove?: () => void;
 }
 
 export function ChordTable(props: ChordTableProps) {
-  const { mode, selectedChord, insertChord, onRemove } = props;
+  const { mode, selectedChord, onRemove } = props;
 
   const pianoRef = useRef<PianoKeyboardRef>(null);
 
   const rows = useMemo(() => {
     const rows: { step: number; triad: Chord; seventh: Chord }[] = [];
 
-    for (let i = 1; i <= 7; i++) {
-      const triad = mode.chord(i);
+    for (let i = 1; i <= mode.notes().count(); i++) {
+      const triad = mode.chord(i, ChordTypeEnum.Triad);
       const seventh = mode.chord(i, ChordTypeEnum.Seventh);
 
       rows.push({
@@ -88,36 +87,29 @@ export function ChordTable(props: ChordTableProps) {
 
     return (
       <div className="flex flex-col justify-between pb-2">
-        <div className="flex justify-between items-center font-semibold">
-          <div className="flex items-center whitespace-nowrap max-sm:flex-col max-sm:items-start">
+        <div className="flex flex-col whitespace-nowrap">
+          <div className="flex justify-between">
             <div className="flex items-center">
               <i
                 className="dragHandle pi pi-bars cursor-grab mr-3"
                 style={{ fontSize: "1rem" }}
               />
-              <div className="flex gap-2 items-center">
-                <TextBeauty className="text-base text-nowrap">
-                  {name}
-                </TextBeauty>
-                <i
-                  className="pi pi-play cursor-pointer"
-                  style={{ fontSize: "0.8rem" }}
-                  onClick={onPlayScale}
-                />
-              </div>
+              <TextBeauty className="text-base text-nowrap font-semibold">{name}</TextBeauty>
             </div>
-
-            <div className="text-sm font-normal ml-2 text-nowrap max-sm:-ml-2">
-              {notes}
-            </div>
-          </div>
-
-          <div className="flex gap-2">
             <i
               className="pi pi-trash cursor-pointer"
               style={{ fontSize: "1rem" }}
               onClick={onRemove}
             />
+          </div>
+
+          <div className="flex items-center">
+            <i
+              className="pi pi-play cursor-pointer"
+              style={{ fontSize: "0.8rem" }}
+              onClick={onPlayScale}
+            />
+            <div className="text-sm font-normal text-nowrap">{notes}</div>
           </div>
         </div>
       </div>

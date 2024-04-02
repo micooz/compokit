@@ -73,6 +73,9 @@ export function AddItemForm(props: AddItemFormProps) {
         options={modeOptions}
         filter
         filterInputAutoFocus={false}
+        optionGroupTemplate={(option) => (<div>- {option.group} -</div>)}
+        optionGroupLabel="group"
+        optionGroupChildren="items"
         placeholder="Select Mode"
         className="w-full"
       />

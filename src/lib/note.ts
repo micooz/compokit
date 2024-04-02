@@ -258,8 +258,8 @@ export class Note {
   add(inter: Inter) {
     const interval = Interval.from(inter);
 
-    if (interval.is("H1")) {
-      throw new Error("unsupported interval: H1");
+    if (interval.is("S1")) {
+      throw new Error("unsupported interval: S1");
     }
 
     if (interval.is("P1")) {
@@ -298,8 +298,8 @@ export class Note {
   minus(inter: Inter) {
     const interval = Interval.from(inter);
 
-    if (interval.is("H1")) {
-      throw new Error("unsupported interval: H1");
+    if (interval.is("S1")) {
+      throw new Error("unsupported interval: S1");
     }
 
     if (interval.is("P1")) {
@@ -370,7 +370,7 @@ export class Note {
       semitones = 1;
     }
 
-    return Interval.fromDegreeAndHalfStepCount(degree, semitones);
+    return Interval.fromDegreeAndSemitones(degree, semitones);
   }
 }
 

@@ -10,7 +10,7 @@ export enum QualityEnum {
 }
 
 const abbrToQualityEnumMap: Record<string, QualityEnum> = {
-  H: QualityEnum.Semitone,
+  S: QualityEnum.Semitone,
   m: QualityEnum.Minor,
   M: QualityEnum.Major,
   P: QualityEnum.Perfect,
@@ -21,7 +21,7 @@ const abbrToQualityEnumMap: Record<string, QualityEnum> = {
 };
 
 const qualityEnumToAbbr: Record<QualityEnum, string> = {
-  [QualityEnum.Semitone]: "H",
+  [QualityEnum.Semitone]: "S",
   [QualityEnum.Minor]: "m",
   [QualityEnum.Major]: "M",
   [QualityEnum.Perfect]: "P",

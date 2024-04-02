@@ -3,8 +3,9 @@ import { Quality } from "./quality";
 
 const halfStepCountMap: Record<string, number> = {
   P1: 0,
-  H1: 1, // special case: only one semitone
+  S1: 1, // special case: only one semitone
 
+  d2: 0,
   m2: 1,
   M2: 2,
   A2: 3,
@@ -74,13 +75,10 @@ export class Interval {
     const degree = Degree.fromNumber(n);
 
     if (n === 1 && !quality.isPerfect() && !quality.isSemitone()) {
-      throw new Error("only perfect unison(P1) or semitone(H1) is valid");
+      throw new Error("only perfect unison(P1) or semitone(S1) is valid");
     }
     if (n === 8 && !quality.isPerfect()) {
       throw new Error("only perfect octave(P8) is valid");
-    }
-    if (n === 2 && quality.isDiminished()) {
-      throw new Error("diminished second(d2) is invalid");
     }
     if (n === 4 || n === 5) {
       if (quality.isMajor() || quality.isMinor()) {
@@ -91,11 +89,7 @@ export class Interval {
     return new Interval(quality, degree);
   }
 
-  static fromDegreeAndHalfStepCount(degree: number, semitones: number) {
-    if (semitones === 0) {
-      return Interval.from("P1");
-    }
-
+  static fromDegreeAndSemitones(degree: number, semitones: number) {
     const key = `${degree}_${semitones}`;
     const abbr = degreeHalfStepCountToAbbr[key];
 

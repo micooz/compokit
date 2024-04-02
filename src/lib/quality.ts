@@ -1,5 +1,5 @@
 export enum QualityEnum {
-  HalfStep,
+  Semitone,
   Minor,
   Major,
   Perfect,
@@ -10,7 +10,7 @@ export enum QualityEnum {
 }
 
 const abbrToQualityEnumMap: Record<string, QualityEnum> = {
-  H: QualityEnum.HalfStep,
+  H: QualityEnum.Semitone,
   m: QualityEnum.Minor,
   M: QualityEnum.Major,
   P: QualityEnum.Perfect,
@@ -21,7 +21,7 @@ const abbrToQualityEnumMap: Record<string, QualityEnum> = {
 };
 
 const qualityEnumToAbbr: Record<QualityEnum, string> = {
-  [QualityEnum.HalfStep]: "H",
+  [QualityEnum.Semitone]: "H",
   [QualityEnum.Minor]: "m",
   [QualityEnum.Major]: "M",
   [QualityEnum.Perfect]: "P",
@@ -32,7 +32,7 @@ const qualityEnumToAbbr: Record<QualityEnum, string> = {
 };
 
 const qualityEnumToString: Record<QualityEnum, string> = {
-  [QualityEnum.HalfStep]: "half step",
+  [QualityEnum.Semitone]: "semitone",
   [QualityEnum.Minor]: "minor",
   [QualityEnum.Major]: "major",
   [QualityEnum.Perfect]: "perfect",
@@ -63,8 +63,8 @@ export class Quality {
     return new Quality(value);
   }
 
-  isHalfStep() {
-    return this._quality === QualityEnum.HalfStep;
+  isSemitone() {
+    return this._quality === QualityEnum.Semitone;
   }
 
   isMajor() {

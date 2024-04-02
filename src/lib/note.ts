@@ -343,8 +343,8 @@ export class Note {
       degree += 7;
     }
 
-    // 2. calculate half step count
-    let halfStepCount = degree * 2 - 2;
+    // 2. calculate semitone count
+    let semitones = degree * 2 - 2;
 
     let from = this.index;
 
@@ -353,24 +353,24 @@ export class Note {
       const note = Note.fromIndex(from + 1);
 
       if (note.is("F") || note.is("C")) {
-        halfStepCount -= 1;
+        semitones -= 1;
       }
 
       from = note.index;
     }
 
     // consider current note's accidental
-    halfStepCount -= accidentalOffsetMap[this._accidental];
+    semitones -= accidentalOffsetMap[this._accidental];
 
     // consider target note's accidental
-    halfStepCount += accidentalOffsetMap[note.accidental];
+    semitones += accidentalOffsetMap[note.accidental];
 
     // in case C# to C is -1
-    if (halfStepCount === -1) {
-      halfStepCount = 1;
+    if (semitones === -1) {
+      semitones = 1;
     }
 
-    return Interval.fromDegreeAndHalfStepCount(degree, halfStepCount);
+    return Interval.fromDegreeAndHalfStepCount(degree, semitones);
   }
 }
 

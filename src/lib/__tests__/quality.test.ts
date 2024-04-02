@@ -12,9 +12,9 @@ test("Quality::fromAbbr", () => {
   expect(Quality.fromAbbr("dd").toString()).toBe("doubly diminished");
 });
 
-test("Quality::isHalfStep", () => {
-  expect(Quality.fromAbbr("H").isHalfStep()).toBe(true);
-  expect(Quality.fromAbbr("M").isHalfStep()).toBe(false);
+test("Quality::isSemitone", () => {
+  expect(Quality.fromAbbr("H").isSemitone()).toBe(true);
+  expect(Quality.fromAbbr("M").isSemitone()).toBe(false);
 });
 
 test("Quality::isMajor", () => {

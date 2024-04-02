@@ -3,7 +3,7 @@ import { Quality } from "./quality";
 
 const halfStepCountMap: Record<string, number> = {
   P1: 0,
-  H1: 1, // special case: only one half step
+  H1: 1, // special case: only one semitone
 
   m2: 1,
   M2: 2,
@@ -73,8 +73,8 @@ export class Interval {
     const n = Number(num);
     const degree = Degree.fromNumber(n);
 
-    if (n === 1 && !quality.isPerfect() && !quality.isHalfStep()) {
-      throw new Error("only perfect unison(P1) or half step(H1) is valid");
+    if (n === 1 && !quality.isPerfect() && !quality.isSemitone()) {
+      throw new Error("only perfect unison(P1) or semitone(H1) is valid");
     }
     if (n === 8 && !quality.isPerfect()) {
       throw new Error("only perfect octave(P8) is valid");
@@ -91,17 +91,17 @@ export class Interval {
     return new Interval(quality, degree);
   }
 
-  static fromDegreeAndHalfStepCount(degree: number, halfStepCount: number) {
-    if (halfStepCount === 0) {
+  static fromDegreeAndHalfStepCount(degree: number, semitones: number) {
+    if (semitones === 0) {
       return Interval.from("P1");
     }
 
-    const key = `${degree}_${halfStepCount}`;
+    const key = `${degree}_${semitones}`;
     const abbr = degreeHalfStepCountToAbbr[key];
 
     if (!abbr) {
       throw new Error(
-        `cannot determine interval from degree = ${degree} and halfStepCount = ${halfStepCount}`
+        `cannot determine interval from degree = ${degree} and semitones = ${semitones}`
       );
     }
 

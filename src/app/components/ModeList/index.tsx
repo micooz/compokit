@@ -80,7 +80,7 @@ export function ModeList(props: ModeListProps) {
     <div className={classNames(className)}>
       <Sticky className="z-10 bg-white pt-4 mb-4 border-b" offsetTop={50}>
         <span className="text-base font-bold border-l-4 pl-2 border-[#1174c0]">
-          Mode Tables
+          Modes & Chords
         </span>
 
         <ModeListOptions className="my-2" />

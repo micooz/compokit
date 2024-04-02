@@ -177,7 +177,7 @@ export function ChordTable(props: ChordTableProps) {
               <th style={{ width: 70 }}>Step</th>
               <th style={{ width: 200 }}>Triad</th>
               <th style={{ width: 260 }}>Seventh Chord</th>
-              <th style={{ width: 260 }}>Tones</th>
+              <th style={{ width: 260 }}>Pitches</th>
             </tr>
           </thead>
           <tbody>

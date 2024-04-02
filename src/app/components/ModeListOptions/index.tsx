@@ -89,7 +89,7 @@ export function ModeListOptions(props: ModeListOptionsProps) {
           htmlFor="showRelatedNotes"
           className="text-xs pl-2 whitespace-nowrap cursor-pointer"
         >
-          Show Related Notes
+          Show Related Pitches
         </label>
       </div>
 
@@ -100,7 +100,7 @@ export function ModeListOptions(props: ModeListOptionsProps) {
             id="search-note-input"
             value={state.searchNote}
             onChange={onSearchNote}
-            placeholder="Search note..."
+            placeholder="Search pitch..."
             className="p-inputtext-sm w-full"
             style={{ paddingRight: state.searchNote ? 16 : "auto" }}
           />

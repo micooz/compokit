@@ -27,8 +27,8 @@ export function ChordTable(props: ChordTableProps) {
   const rows = useMemo(() => {
     const rows: { step: number; triad: Chord; seventh: Chord }[] = [];
 
-    for (let i = 1; i <= 7; i++) {
-      const triad = mode.chord(i);
+    for (let i = 1; i <= mode.notes().count(); i++) {
+      const triad = mode.chord(i, ChordTypeEnum.Triad);
       const seventh = mode.chord(i, ChordTypeEnum.Seventh);
 
       rows.push({
@@ -87,36 +87,29 @@ export function ChordTable(props: ChordTableProps) {
 
     return (
       <div className="flex flex-col justify-between pb-2">
-        <div className="flex justify-between items-center font-semibold">
-          <div className="flex items-center whitespace-nowrap max-sm:flex-col max-sm:items-start">
+        <div className="flex flex-col whitespace-nowrap">
+          <div className="flex justify-between">
             <div className="flex items-center">
               <i
                 className="dragHandle pi pi-bars cursor-grab mr-3"
                 style={{ fontSize: "1rem" }}
               />
-              <div className="flex gap-2 items-center">
-                <TextBeauty className="text-base text-nowrap">
-                  {name}
-                </TextBeauty>
-                <i
-                  className="pi pi-play cursor-pointer"
-                  style={{ fontSize: "0.8rem" }}
-                  onClick={onPlayScale}
-                />
-              </div>
+              <TextBeauty className="text-base text-nowrap font-semibold">{name}</TextBeauty>
             </div>
-
-            <div className="text-sm font-normal ml-2 text-nowrap max-sm:-ml-2">
-              {notes}
-            </div>
-          </div>
-
-          <div className="flex gap-2">
             <i
               className="pi pi-trash cursor-pointer"
               style={{ fontSize: "1rem" }}
               onClick={onRemove}
             />
+          </div>
+
+          <div className="flex items-center">
+            <i
+              className="pi pi-play cursor-pointer"
+              style={{ fontSize: "0.8rem" }}
+              onClick={onPlayScale}
+            />
+            <div className="text-sm font-normal text-nowrap">{notes}</div>
           </div>
         </div>
       </div>
@@ -128,6 +121,8 @@ export function ChordTable(props: ChordTableProps) {
 
     const abbr = chord.toAbbr({ transformAccidental: true });
     const notes = useMemo(() => chord.notes().withGroup(3).names(), [chord]);
+
+    const showCloneIcon = !!selectedChord; // || insertChord;
 
     return (
       <PercussionPad
@@ -143,8 +138,8 @@ export function ChordTable(props: ChordTableProps) {
         <TouchEvent onTouchStart={() => onAddChord(chord, step)}>
           <i
             className={classNames("p-1 hover:bg-gray-300 active:bg-gray-400", {
-              "pi pi-clone": !!selectedChord,
-              "pi pi-plus": !selectedChord,
+              "pi pi-clone": showCloneIcon,
+              "pi pi-plus": !showCloneIcon,
             })}
             style={{ fontSize: "0.8rem" }}
           />
@@ -177,7 +172,7 @@ export function ChordTable(props: ChordTableProps) {
               <th style={{ width: 70 }}>Step</th>
               <th style={{ width: 200 }}>Triad</th>
               <th style={{ width: 260 }}>Seventh Chord</th>
-              <th style={{ width: 260 }}>Tones</th>
+              <th style={{ width: 260 }}>Pitches</th>
             </tr>
           </thead>
           <tbody>

@@ -72,8 +72,8 @@ test("Note::add", () => {
   // with group
   const note1 = Note.from("C3");
 
-  expect(() => note1.add("H1").nameWithGroup()).toThrow(
-    "unsupported interval: H1"
+  expect(() => note1.add("S1").nameWithGroup()).toThrow(
+    "unsupported interval: S1"
   );
   expect(note1.add("P1").nameWithGroup()).toBe("C3");
   expect(note1.add("P8").nameWithGroup()).toBe("C4");
@@ -88,8 +88,8 @@ test("Note::minus", () => {
   // with group
   const note1 = Note.from("C3");
 
-  expect(() => note1.minus("H1").nameWithGroup()).toThrow(
-    "unsupported interval: H1"
+  expect(() => note1.minus("S1").nameWithGroup()).toThrow(
+    "unsupported interval: S1"
   );
   expect(note1.minus("P1").nameWithGroup()).toBe("C3");
   expect(note1.minus("P8").minus("m2").nameWithGroup()).toBe("B1");
@@ -102,12 +102,12 @@ test("Note::minus", () => {
 
 test("Note::to", () => {
   expect(Note.from("C").to(Note.from("C")).toAbbr()).toBe("P1");
-  expect(Note.from("D#").to(Note.from("Eb")).toAbbr()).toBe("P1");
+  expect(Note.from("D#").to(Note.from("Eb")).toAbbr()).toBe("d2");
 
-  expect(Note.from("C").to(Note.from("C#")).toAbbr()).toBe("H1");
-  expect(Note.from("Cb").to(Note.from("C")).toAbbr()).toBe("H1");
-  expect(Note.from("C#").to(Note.from("C")).toAbbr()).toBe("H1");
-  expect(Note.from("B").to(Note.from("B#")).toAbbr()).toBe("H1");
+  expect(Note.from("C").to(Note.from("C#")).toAbbr()).toBe("S1");
+  expect(Note.from("Cb").to(Note.from("C")).toAbbr()).toBe("S1");
+  expect(Note.from("C#").to(Note.from("C")).toAbbr()).toBe("S1");
+  expect(Note.from("B").to(Note.from("B#")).toAbbr()).toBe("S1");
 
   expect(Note.from("C").to(Note.from("D")).toAbbr()).toBe("M2");
   expect(Note.from("E").to(Note.from("F")).toAbbr()).toBe("m2");

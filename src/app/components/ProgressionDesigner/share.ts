@@ -4,6 +4,7 @@ export type ProgressionVO = {
   name: string;
   chords: ChordItem[];
   arrangement: "horizontal" | "vertical";
+  insertIndex: number;
 };
 
 export type ChordItem = {

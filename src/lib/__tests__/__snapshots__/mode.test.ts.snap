@@ -21,56 +21,79 @@ exports[`Mode:getKeys 1`] = `
 exports[`Mode:modes 1`] = `
 [
   {
-    "label": "Natural Major",
-    "value": 0,
+    "group": "Major and Minor",
+    "items": [
+      {
+        "label": "Natural Major",
+        "value": 0,
+      },
+      {
+        "label": "Harmonic Major",
+        "value": 1,
+      },
+      {
+        "label": "Melodic Major",
+        "value": 2,
+      },
+      {
+        "label": "Natural Minor",
+        "value": 3,
+      },
+      {
+        "label": "Harmonic Minor",
+        "value": 4,
+      },
+      {
+        "label": "Melodic Minor",
+        "value": 5,
+      },
+    ],
   },
   {
-    "label": "Harmonic Major",
-    "value": 1,
+    "group": "Church Mode",
+    "items": [
+      {
+        "label": "Ionian",
+        "value": 6,
+      },
+      {
+        "label": "Dorian",
+        "value": 7,
+      },
+      {
+        "label": "Phrygian",
+        "value": 8,
+      },
+      {
+        "label": "Lydian",
+        "value": 9,
+      },
+      {
+        "label": "Mixolydian",
+        "value": 10,
+      },
+      {
+        "label": "Aeolian",
+        "value": 11,
+      },
+      {
+        "label": "Locrian",
+        "value": 12,
+      },
+    ],
   },
   {
-    "label": "Melodic Major",
-    "value": 2,
-  },
-  {
-    "label": "Natural Minor",
-    "value": 3,
-  },
-  {
-    "label": "Harmonic Minor",
-    "value": 4,
-  },
-  {
-    "label": "Melodic Minor",
-    "value": 5,
-  },
-  {
-    "label": "Ionian",
-    "value": 6,
-  },
-  {
-    "label": "Dorian",
-    "value": 7,
-  },
-  {
-    "label": "Phrygian",
-    "value": 8,
-  },
-  {
-    "label": "Lydian",
-    "value": 9,
-  },
-  {
-    "label": "Mixolydian",
-    "value": 10,
-  },
-  {
-    "label": "Aeolian",
-    "value": 11,
-  },
-  {
-    "label": "Locrian",
-    "value": 12,
+    "group": "Jazz",
+    "items": [
+      {
+        "label": "Melodic Minor (Jazz)",
+        "value": 15,
+      },
+      {
+        "label": "Harmonic Minor (Jazz)",
+        "value": 16,
+      },
+    ],
   },
 ]
 `;

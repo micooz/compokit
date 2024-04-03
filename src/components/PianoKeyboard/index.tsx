@@ -192,7 +192,7 @@ export const PianoKeyboard = React.forwardRef<
 
     return (
       <div className="mb-1 text-sm">
-        Notes:&nbsp;
+        Pitches:&nbsp;
         {notes.length > 0 ? <TextBeauty>{hint}</TextBeauty> : "<none>"}
       </div>
     );

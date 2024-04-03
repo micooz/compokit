@@ -80,7 +80,7 @@ export function ModeList(props: ModeListProps) {
     <div className={classNames(className)}>
       <Sticky className="z-10 bg-white pt-4 mb-4 border-b" offsetTop={50}>
         <span className="text-base font-bold border-l-4 pl-2 border-[#1174c0]">
-          Mode Tables
+          Modes & Chords
         </span>
 
         <ModeListOptions className="my-2" />
@@ -107,7 +107,11 @@ export function ModeList(props: ModeListProps) {
           onSort={onSort}
           animation={200}
           handle=".dragHandle"
-          className={classNames("grid gap-4 max-w-full", "min-[1180px]:grid-cols-2")}
+          className={classNames(
+            "grid gap-4 max-w-full",
+            "min-[2200px]:grid-cols-3",
+            "min-[1180px]:grid-cols-2"
+          )}
         >
           {state.list.map((item) => {
             const mode = Mode.from(item.key, item.mode);
@@ -127,8 +131,9 @@ export function ModeList(props: ModeListProps) {
       <Dialog
         visible={state.addItemDialog.show}
         onHide={() => (state.addItemDialog.show = false)}
+        blockScroll
         header="New Table"
-        style={{ width: "300px" }}
+        className="max-sm:w-[70vw] w-[20rem]"
       >
         <AddItemForm list={state.list} onSubmit={onAdd} />
       </Dialog>

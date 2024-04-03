@@ -34,7 +34,7 @@ export function NoteItem(props: NoteItemProps) {
         const from = Note.from(item);
         const to = Note.from(note);
 
-        if (from.to(to).isHalfStep()) {
+        if (from.to(to).isSemitone()) {
           state.highlight = "light";
           match = true;
           // break;

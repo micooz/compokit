@@ -6,15 +6,15 @@ test("Quality::new", () => {
 
 test("Quality::fromAbbr", () => {
   expect(() => Quality.fromAbbr("xx")).toThrow(
-    'unknown abbr "xx" while converting to Quality, supported values: H,m,M,P,A,AA,d,dd'
+    'unknown abbr "xx" while converting to Quality, supported values: S,m,M,P,A,AA,d,dd'
   );
 
   expect(Quality.fromAbbr("dd").toString()).toBe("doubly diminished");
 });
 
-test("Quality::isHalfStep", () => {
-  expect(Quality.fromAbbr("H").isHalfStep()).toBe(true);
-  expect(Quality.fromAbbr("M").isHalfStep()).toBe(false);
+test("Quality::isSemitone", () => {
+  expect(Quality.fromAbbr("S").isSemitone()).toBe(true);
+  expect(Quality.fromAbbr("M").isSemitone()).toBe(false);
 });
 
 test("Quality::isMajor", () => {

@@ -102,4 +102,8 @@ export class Quality {
   toString(flavor?: string) {
     return qualityEnumToString[this._quality];
   }
+
+  valueOf() {
+    return this._quality;
+  }
 }

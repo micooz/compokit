@@ -1,5 +1,94 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Mode::chords 1`] = `
+[
+  {
+    "mode": {
+      "key": "Eb",
+      "type": 0,
+    },
+    "notes": [
+      "Eb",
+      "G",
+      "Bb",
+    ],
+    "step": 1,
+  },
+  {
+    "mode": {
+      "key": "Eb",
+      "type": 0,
+    },
+    "notes": [
+      "F",
+      "Ab",
+      "C",
+    ],
+    "step": 2,
+  },
+  {
+    "mode": {
+      "key": "Eb",
+      "type": 0,
+    },
+    "notes": [
+      "G",
+      "Bb",
+      "D",
+    ],
+    "step": 3,
+  },
+  {
+    "mode": {
+      "key": "Eb",
+      "type": 0,
+    },
+    "notes": [
+      "Ab",
+      "C",
+      "Eb",
+    ],
+    "step": 4,
+  },
+  {
+    "mode": {
+      "key": "Eb",
+      "type": 0,
+    },
+    "notes": [
+      "Bb",
+      "D",
+      "F",
+    ],
+    "step": 5,
+  },
+  {
+    "mode": {
+      "key": "Eb",
+      "type": 0,
+    },
+    "notes": [
+      "C",
+      "Eb",
+      "G",
+    ],
+    "step": 6,
+  },
+  {
+    "mode": {
+      "key": "Eb",
+      "type": 0,
+    },
+    "notes": [
+      "D",
+      "F",
+      "Ab",
+    ],
+    "step": 7,
+  },
+]
+`;
+
 exports[`Mode:getKeys 1`] = `
 [
   "C",

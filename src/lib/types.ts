@@ -1,3 +1,4 @@
+import type { Interval } from "./interval";
 import type { Note } from "./note";
 import type { NoteArray } from "./note-array";
 
@@ -82,3 +83,16 @@ export type NoteIsOptions = {
 export type NoteType = string | Note;
 
 export type Notes = string[] | Note[] | NoteArray;
+
+export type Inter = string | Interval;
+
+export enum DegreeEnum {
+  Unison = 1,
+  Second,
+  Third,
+  Fourth,
+  Fifth,
+  Sixth,
+  Seventh,
+  Octave,
+}

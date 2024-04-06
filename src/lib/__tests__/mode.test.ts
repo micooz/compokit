@@ -84,6 +84,14 @@ test("Mode::chord", () => {
   expect(mode2.chord(5, ChordTypeEnum.Triad).notes().join()).toBe("G4 B4 D5");
 });
 
+test("Mode::chords", () => {
+  const mode = Mode.from("Eb", ModeEnum.NaturalMajor);
+
+  expect(
+    mode.chords(ChordTypeEnum.Triad).map((item) => item.toJSON())
+  ).toMatchSnapshot();
+});
+
 test("Mode::transpose", () => {
   expect(
     Mode.from("Eb", ModeEnum.NaturalMajor).transpose("low", "m3").notes().join()
@@ -122,9 +130,22 @@ test("Mode::relative", () => {
   );
 });
 
+test("Mode::dominant", () => {
+  const mode = Mode.from("C", ModeEnum.NaturalMajor);
+  expect(mode.dominant().name()).toBe("G Natural Major");
+});
+
+test("Mode::subDominant", () => {
+  const mode = Mode.from("C", ModeEnum.NaturalMajor);
+  expect(mode.subDominant().name()).toBe("F Natural Major");
+});
+
 test("Mode::name", () => {
   const mode = new Mode([Note.from("C"), Note.from("Eb")]);
   expect(mode.name()).toBe("C Unknown Mode");
+
+  const mode3 = Mode.from("C", ModeEnum.HarmonicMajor);
+  expect(mode3.name({ shortName: true })).toBe("C Major");
 });
 
 test("Mode::notes", () => {

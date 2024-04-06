@@ -64,7 +64,7 @@ export class Chord {
     const intervals = dedup.intervals();
 
     // extract degrees
-    const degrees = intervals.map((inter) => inter.degree.valueOf());
+    const degrees = intervals.map((inter) => inter.degree().valueOf());
 
     // determine inversion and tonic index
     const [inversion, tonicIndex] =
@@ -99,10 +99,10 @@ export class Chord {
     return this._step;
   }
 
-  // TODO: fromAbbr
-  static fromAbbr(abbr: string) {
-    //
-  }
+  // // TODO: fromAbbr
+  // static fromAbbr(abbr: string) {
+  //   //
+  // }
 
   static fromJSON(json: ChordJSON) {
     const { notes, mode, step } = json;

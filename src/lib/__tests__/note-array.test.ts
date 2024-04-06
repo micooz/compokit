@@ -5,6 +5,7 @@ test("NoteArray::new", () => {
   expect(new NoteArray([]).count()).toBe(0);
   expect(new NoteArray(["C"]).names()).toEqual(["C"]);
   expect(new NoteArray([Note.from("C")]).names()).toEqual(["C"]);
+  expect(new NoteArray(new NoteArray(["C"])).names()).toEqual(["C"]);
 });
 
 test("NoteArray::from", () => {

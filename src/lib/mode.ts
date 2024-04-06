@@ -1,11 +1,12 @@
 import { Chord } from "./chord";
 import { range, transformObject } from "./utils";
-import { Inter, Interval } from "./interval";
+import { Interval } from "./interval";
 import { Note } from "./note";
 import { NoteArray } from "./note-array";
 import {
   AccidentalEnum,
   ChordTypeEnum,
+  Inter,
   ModeEnum,
   ModeNameOptions,
   NoteType,
@@ -276,14 +277,14 @@ export class Mode {
         return { ...acc, ...next };
       }, {});
 
-      mode = map[this._mode!] || "Unknown Mode";
+      mode = map[this._mode]!;
     }
 
     if (opts?.shortName) {
       mode = mode
-        .replace("Natural", "")
-        .replace("Harmonic", "")
-        .replace("Melodic", "");
+        .replace("Natural ", "")
+        .replace("Harmonic ", "")
+        .replace("Melodic ", "");
     }
 
     return `${root} ${mode}`;

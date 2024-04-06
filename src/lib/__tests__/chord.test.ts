@@ -26,6 +26,16 @@ test("Chord::fromAbbr", () => {
   //
 });
 
+test("Chord::fromJSON", () => {
+  expect(Chord.fromJSON({ notes: ["C", "E", "G"] }).toAbbr()).toBe("C");
+  expect(
+    Chord.fromJSON({
+      notes: ["C", "E", "G"],
+      mode: { key: "C", type: ModeEnum.NaturalMajor },
+    }).toAbbr()
+  ).toBe("C");
+});
+
 test("Chord::toAbbr", () => {
   const chord = new Chord(["E", "G", "C"]);
   expect(chord.toAbbr()).toBe("C/E");
@@ -37,6 +47,7 @@ test("Chord::inverse", () => {
 
   // with group
   const chord2 = new Chord(["G4", "B4", "D5", "F5"]);
+  expect(chord2.inverse(-1).notes().join()).toBe("F4 G4 B4 D5");
   expect(chord2.inverse(1).notes().join()).toBe("B4 D5 F5 G5");
   expect(chord2.inverse(2).notes().join()).toBe("D5 F5 G5 B5");
   expect(chord2.inverse(3).notes().join()).toBe("F5 G5 B5 D6");
@@ -50,6 +61,9 @@ test("Chord::inversion", () => {
 test("Chord::rootPosition", () => {
   const chord = new Chord(["E", "G", "C"]);
   expect(chord.rootPosition().notes().join()).toBe("C E G");
+
+  const chord2 = new Chord(["C", "E", "G"]);
+  expect(chord2.rootPosition().notes().join()).toBe("C E G");
 });
 
 test("Chord::notes", () => {
@@ -91,9 +105,32 @@ test("Chord::resolveTo", () => {
   });
 
   expect(snapshot).toMatchSnapshot();
+
+  // @ts-ignore
+  expect(new Chord(["C", "E", "G"]).resolveTo({ algorithm: null })).toEqual([]);
+
+  expect(() =>
+    new Chord(["C", "E", "G"]).resolveTo({ algorithm: "closely-related-modes" })
+  ).toThrow("this chord is not associated with a mode");
 });
 
 test("Chord::clone", () => {
   const chord = new Chord(["E", "G", "C"]);
   expect(chord.clone().is(chord)).toBe(true);
+});
+
+test("Chord::toJSON", () => {
+  const chord = new Chord(
+    ["E", "G", "C"],
+    Mode.from("G", ModeEnum.NaturalMajor),
+    4
+  );
+  expect(chord.toJSON()).toEqual({
+    mode: {
+      key: "G",
+      type: 0,
+    },
+    notes: ["E", "G", "C"],
+    step: 4,
+  });
 });

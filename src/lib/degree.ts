@@ -1,24 +1,4 @@
-export enum DegreeEnum {
-  Unison = 1,
-  Second,
-  Third,
-  Fourth,
-  Fifth,
-  Sixth,
-  Seventh,
-  Octave,
-}
-
-const degreeEnumToString: Record<DegreeEnum, string> = {
-  [DegreeEnum.Unison]: "unison",
-  [DegreeEnum.Second]: "2nd",
-  [DegreeEnum.Third]: "3rd",
-  [DegreeEnum.Fourth]: "4th",
-  [DegreeEnum.Fifth]: "5th",
-  [DegreeEnum.Sixth]: "6th",
-  [DegreeEnum.Seventh]: "7th",
-  [DegreeEnum.Octave]: "octave",
-};
+import { DegreeEnum } from "./types";
 
 export class Degree {
   private _degree: DegreeEnum;
@@ -27,7 +7,7 @@ export class Degree {
     this._degree = degree;
   }
 
-  static fromNumber(num: number | string) {
+  static from(num: number | string) {
     const n = Number(num);
 
     if (!Number.isInteger(n)) {
@@ -42,10 +22,6 @@ export class Degree {
   }
 
   valueOf() {
-    return this._degree.valueOf();
-  }
-
-  toString() {
-    return degreeEnumToString[this._degree];
+    return this._degree;
   }
 }

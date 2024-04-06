@@ -60,16 +60,29 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
     state.list = progressions.map((item) => ({
       name: item.name,
-      chords: item.chords.map((it) => ({
-        chord: new Chord(it.chord),
-        step: it.step,
-        inversion: it.inversion || 0,
-        omits: NoteArray.from(it.omits),
-        octave: it.octave || 0,
-        playing: false,
-        selected: false,
-        mode: it.mode ? Mode.from(it.mode.key, it.mode.type!) : undefined,
-      })),
+      chords: item.chords.map((it) => {
+        let chord: Chord;
+
+        // compatible to previous storage data
+        if (Array.isArray(it.chord)) {
+          const mode = it.mode
+            ? Mode.from(it.mode.key, it.mode.type!)
+            : undefined;
+
+          chord = new Chord(it.chord, mode, it.step);
+        } else {
+          chord = Chord.fromJSON(it.chord);
+        }
+
+        return {
+          chord: chord,
+          inversion: it.inversion || 0,
+          omits: NoteArray.from(it.omits),
+          octave: it.octave || 0,
+          playing: false,
+          selected: false,
+        };
+      }),
       arrangement: item.arrangement || "horizontal",
       insertIndex: -1,
     }));
@@ -87,15 +100,10 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     storage.progressions = state.list.map((item) => ({
       ...item,
       chords: item.chords.map((it) => ({
-        ...it,
-        chord: it.chord.noteNames(),
+        chord: it.chord.toJSON(),
         omits: it.omits.names(),
-        mode: it.mode
-          ? {
-              key: it.mode.key().name(),
-              type: it.mode.type()!,
-            }
-          : undefined,
+        inversion: it.inversion,
+        octave: it.octave,
       })),
     }));
   }
@@ -276,13 +284,11 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
     const newChord: ChordItem = {
       chord,
-      step,
       inversion: 0,
       omits: NoteArray.from([]),
       octave: 0,
       playing: false,
       selected: false,
-      mode,
     };
 
     const selectedChordIndex = chords.findIndex((item) => item.selected);

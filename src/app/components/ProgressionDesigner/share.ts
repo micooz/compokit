@@ -1,4 +1,4 @@
-import type { Chord, Mode, NoteArray } from "@/lib";
+import type { Chord, NoteArray } from "@/lib";
 
 export type ProgressionVO = {
   name: string;
@@ -9,11 +9,9 @@ export type ProgressionVO = {
 
 export type ChordItem = {
   chord: Chord;
-  step?: number;
   inversion: number;
   omits: NoteArray;
   octave: 0 | 8 | -8;
   playing: boolean;
   selected: boolean;
-  mode?: Mode;
 };

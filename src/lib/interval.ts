@@ -147,8 +147,16 @@ export class Interval {
     return this._quality.isAugmented();
   }
 
+  isDoublyAugmented() {
+    return this._quality.isDoublyAugmented();
+  }
+
   isDiminished() {
     return this._quality.isDiminished();
+  }
+
+  isDoublyDiminished() {
+    return this._quality.isDoublyDiminished();
   }
 
   toAbbr() {

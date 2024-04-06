@@ -1,4 +1,4 @@
-import { range } from "../common";
+import { range } from "../utils";
 
 test("range", () => {
   expect(() => range("C4", "G")).toThrow(

@@ -83,8 +83,16 @@ export class Quality {
     return this._quality === QualityEnum.Augmented;
   }
 
+  isDoublyAugmented() {
+    return this._quality === QualityEnum.DoublyAugmented;
+  }
+
   isDiminished() {
     return this._quality === QualityEnum.Diminished;
+  }
+
+  isDoublyDiminished() {
+    return this._quality === QualityEnum.DoublyDiminished;
   }
 
   toAbbr() {

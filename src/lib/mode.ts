@@ -1,39 +1,16 @@
-import { Chord, ChordTypeEnum } from "./chord";
-import { range, transformObject } from "./common";
+import { Chord } from "./chord";
+import { range, transformObject } from "./utils";
 import { Inter, Interval } from "./interval";
+import { Note } from "./note";
+import { NoteArray } from "./note-array";
 import {
   AccidentalEnum,
-  Note,
-  NoteToNameOptions,
+  ChordTypeEnum,
+  ModeEnum,
+  ModeNameOptions,
   NoteType,
   Notes,
-} from "./note";
-import { NoteArray } from "./note-array";
-
-export enum ModeEnum {
-  // major and minor
-  NaturalMajor,
-  HarmonicMajor,
-  MelodicMajor,
-  NaturalMinor,
-  HarmonicMinor,
-  MelodicMinor,
-  // church mode
-  Ionian,
-  Dorian,
-  Phrygian,
-  Lydian,
-  Mixolydian,
-  Aeolian,
-  Locrian,
-  // jazz
-  MajorBlues,
-  MinorBlues,
-  JazzMelodicMinor,
-  JazzHarmonicMinor,
-  Bebop,
-  Diminished,
-}
+} from "./types";
 
 const majorMinorRelations: Record<number, ModeEnum> = {
   [ModeEnum.NaturalMajor]: ModeEnum.NaturalMinor,
@@ -108,14 +85,12 @@ const modeToIntervals = transformObject(
   (_, abbrs) => abbrs.map((abbr) => Interval.from(abbr))
 );
 
-type ModeNameOptions = { shortName?: boolean } & NoteToNameOptions;
-
 export class Mode {
   private _noteArr: NoteArray;
 
   private _mode?: ModeEnum;
 
-  constructor(notes: Notes | NoteArray, mode?: ModeEnum) {
+  constructor(notes: Notes, mode?: ModeEnum) {
     this._noteArr = Array.isArray(notes) ? new NoteArray(notes) : notes;
 
     if (this._noteArr.count() === 0) {
@@ -200,7 +175,7 @@ export class Mode {
     const count = this._noteArr.count();
 
     if (step < 1 || step > count) {
-      throw new Error(`step must be between 1 and ${count}`);
+      throw new Error(`step must be between 1 and ${count}, but got: ${step}`);
     }
 
     const indexes = chordTypeEnumToIndexes[type];
@@ -224,7 +199,20 @@ export class Mode {
       return note;
     });
 
-    return new Chord(notes);
+    return new Chord(notes, this.clone(), step);
+  }
+
+  chords(type: ChordTypeEnum) {
+    const to = this.notes().count();
+
+    const chords: Chord[] = [];
+
+    for (let step = 1; step <= to; step += 1) {
+      const chord = this.chord(step, type);
+      chords.push(chord);
+    }
+
+    return chords;
   }
 
   transpose(direction: "low" | "high", inter: Inter) {
@@ -266,6 +254,14 @@ export class Mode {
     const mode = majorMinorRelations[this._mode!];
 
     return Mode.from(root, mode);
+  }
+
+  dominant() {
+    return Mode.from(this._noteArr.get(4)!, this._mode!);
+  }
+
+  subDominant() {
+    return Mode.from(this._noteArr.get(3)!, this._mode!);
   }
 
   name(opts?: ModeNameOptions) {

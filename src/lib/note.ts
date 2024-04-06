@@ -1,24 +1,11 @@
 import { Inter, Interval } from "./interval";
-import { NoteArray } from "./note-array";
-
-export enum NoteEnum {
-  C = 1,
-  D,
-  E,
-  F,
-  G,
-  A,
-  B,
-}
-
-export enum AccidentalEnum {
-  Natural,
-  NaturalWithSymbol,
-  Sharp,
-  Flat,
-  DoubleSharp,
-  DoubleFlat,
-}
+import {
+  AccidentalEnum,
+  NoteEnum,
+  NoteIsOptions,
+  NoteToNameOptions,
+  NoteType,
+} from "./types";
 
 const abbrToNoteEnum: Record<string, NoteEnum> = {
   C: NoteEnum.C,
@@ -86,15 +73,6 @@ const noteAbbrRegex = new RegExp(
   `^([${noteNames.join("")}])([^\\d]{0,})(\\d{0,})$`,
   "i"
 );
-
-export type NoteToNameOptions = {
-  transformAccidental?: boolean;
-};
-
-export type NoteIsOptions = {
-  checkGroup?: boolean;
-  checkAccidental?: boolean;
-};
 
 export class Note {
   /**
@@ -378,7 +356,3 @@ export class MidiNote extends Note {
    */
   private _velocity?: number;
 }
-
-export type NoteType = string | Note;
-
-export type Notes = string[] | Note[] | NoteArray;

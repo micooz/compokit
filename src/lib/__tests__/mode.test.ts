@@ -1,6 +1,6 @@
-import { ChordTypeEnum } from "../chord";
-import { Mode, ModeEnum } from "../mode";
+import { Mode } from "../mode";
 import { Note } from "../note";
+import { ChordTypeEnum, ModeEnum } from "../types";
 
 test("scale notes should match", () => {
   const scales = [
@@ -70,8 +70,8 @@ test("Mode::chord", () => {
   );
   expect(() => mode.chord(1, -1 as any)).toThrow("unknown chord type: -1");
 
-  expect(mode.chord(1, ChordTypeEnum.Triad).join()).toBe("Eb G Bb");
-  expect(mode.chord(2, ChordTypeEnum.Seventh).join()).toBe("F Ab C Eb");
+  expect(mode.chord(1, ChordTypeEnum.Triad).notes().join()).toBe("Eb G Bb");
+  expect(mode.chord(2, ChordTypeEnum.Seventh).notes().join()).toBe("F Ab C Eb");
   // expect(mode.chord(3, ChordTypeEnum.Ninth).join()).toBe(
   //   "G Bb D F Ab"
   // );
@@ -81,7 +81,7 @@ test("Mode::chord", () => {
 
   // with group
   const mode2 = Mode.from("C4", ModeEnum.NaturalMajor);
-  expect(mode2.chord(5, ChordTypeEnum.Triad).join()).toBe("G4 B4 D5");
+  expect(mode2.chord(5, ChordTypeEnum.Triad).notes().join()).toBe("G4 B4 D5");
 });
 
 test("Mode::transpose", () => {

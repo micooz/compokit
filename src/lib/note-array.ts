@@ -1,12 +1,7 @@
-import { dedupBy } from "./common";
+import { dedupBy } from "./utils";
 import { Interval } from "./interval";
-import {
-  Note,
-  NoteIsOptions,
-  NoteToNameOptions,
-  NoteType,
-  Notes,
-} from "./note";
+import { Note } from "./note";
+import { NoteIsOptions, NoteToNameOptions, NoteType, Notes } from "./types";
 
 export type WithGroupOptions = {
   // autoGroup?: boolean;

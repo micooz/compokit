@@ -1,5 +1,6 @@
-import { Note, NoteType } from "./note";
+import { Note } from "./note";
 import { NoteArray } from "./note-array";
+import { NoteType } from "./types";
 
 export function transformObject<T, R>(
   obj: Record<string, T>,

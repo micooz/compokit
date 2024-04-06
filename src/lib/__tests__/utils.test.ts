@@ -1,4 +1,16 @@
-import { range } from "../common";
+import { dedupBy, range, transformObject } from "../utils";
+
+test("transformObject", () => {
+  expect(
+    transformObject({ foo: "bar" }, (key, value) => `${key}_${value}`)
+  ).toEqual({ foo: "foo_bar" });
+});
+
+test("dedupBy", () => {
+  expect(
+    dedupBy([{ foo: "bar" }, { foo: "bar", bar: "baz" }], (item) => item.foo)
+  ).toEqual([{ foo: "bar", bar: "baz" }]);
+});
 
 test("range", () => {
   expect(() => range("C4", "G")).toThrow(

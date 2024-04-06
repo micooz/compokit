@@ -1,24 +1,12 @@
-import { Inter, Interval } from "./interval";
-import { NoteArray } from "./note-array";
-
-export enum NoteEnum {
-  C = 1,
-  D,
-  E,
-  F,
-  G,
-  A,
-  B,
-}
-
-export enum AccidentalEnum {
-  Natural,
-  NaturalWithSymbol,
-  Sharp,
-  Flat,
-  DoubleSharp,
-  DoubleFlat,
-}
+import { Interval } from "./interval";
+import {
+  AccidentalEnum,
+  Inter,
+  NoteEnum,
+  NoteIsOptions,
+  NoteToNameOptions,
+  NoteType,
+} from "./types";
 
 const abbrToNoteEnum: Record<string, NoteEnum> = {
   C: NoteEnum.C,
@@ -86,15 +74,6 @@ const noteAbbrRegex = new RegExp(
   `^([${noteNames.join("")}])([^\\d]{0,})(\\d{0,})$`,
   "i"
 );
-
-export type NoteToNameOptions = {
-  transformAccidental?: boolean;
-};
-
-export type NoteIsOptions = {
-  checkGroup?: boolean;
-  checkAccidental?: boolean;
-};
 
 export class Note {
   /**
@@ -266,7 +245,7 @@ export class Note {
       return this.clone();
     }
 
-    const degree = interval.degree.valueOf();
+    const degree = interval.degree().valueOf();
     const nextNoteAbs = this._note.valueOf() + degree - 1;
 
     // move to the same octave
@@ -279,7 +258,7 @@ export class Note {
         : this._group + Math.floor((nextNoteAbs - 1) / 7);
 
     // decide next note's accidental
-    const diff = interval.semitones - this.to(nextNote).semitones;
+    const diff = interval.semitones() - this.to(nextNote).semitones();
 
     const accidental = {
       [-2]: AccidentalEnum.DoubleFlat,
@@ -306,7 +285,7 @@ export class Note {
       return this.clone();
     }
 
-    const degree = interval.degree.valueOf();
+    const degree = interval.degree().valueOf();
     const nextNoteAbs = this._note.valueOf() - degree + 1;
 
     // move to the same octave
@@ -319,7 +298,7 @@ export class Note {
         : this._group + Math.floor((nextNoteAbs - 1) / 7);
 
     // decide next note's accidental
-    const diff = interval.semitones - nextNote.to(this).semitones;
+    const diff = interval.semitones() - nextNote.to(this).semitones();
 
     const accidental = {
       [2]: AccidentalEnum.DoubleFlat,
@@ -371,14 +350,3 @@ export class Note {
     return Interval.fromDegreeAndSemitones(degree, semitones);
   }
 }
-
-export class MidiNote extends Note {
-  /**
-   * 0-127
-   */
-  private _velocity?: number;
-}
-
-export type NoteType = string | Note;
-
-export type Notes = string[] | Note[] | NoteArray;

@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Chord::resolveTo 1`] = `
+[
+  {
+    "from": {
+      "chord": "G",
+      "mode": "C Natural Major",
+      "step": undefined,
+    },
+    "to": [
+      {
+        "chord": "C",
+        "mode": "C Natural Major",
+        "step": 1,
+      },
+      {
+        "chord": "C",
+        "mode": "A Natural Minor",
+        "step": 3,
+      },
+      {
+        "chord": "C",
+        "mode": "E Natural Minor",
+        "step": 6,
+      },
+      {
+        "chord": "C",
+        "mode": "D Natural Minor",
+        "step": 7,
+      },
+      {
+        "chord": "C",
+        "mode": "G Natural Major",
+        "step": 4,
+      },
+      {
+        "chord": "C",
+        "mode": "F Natural Major",
+        "step": 5,
+      },
+      {
+        "chord": "Cm",
+        "mode": "C Natural Minor",
+        "step": 1,
+      },
+      {
+        "chord": "Eb",
+        "mode": "C Natural Minor",
+        "step": 3,
+      },
+      {
+        "chord": "Ab",
+        "mode": "C Natural Minor",
+        "step": 6,
+      },
+    ],
+  },
+  {
+    "from": {
+      "chord": "G7",
+      "mode": "C Natural Major",
+      "step": undefined,
+    },
+    "to": [
+      {
+        "chord": "C",
+        "mode": "C Natural Major",
+        "step": 1,
+      },
+      {
+        "chord": "C",
+        "mode": "A Natural Minor",
+        "step": 3,
+      },
+      {
+        "chord": "C",
+        "mode": "E Natural Minor",
+        "step": 6,
+      },
+      {
+        "chord": "C",
+        "mode": "D Natural Minor",
+        "step": 7,
+      },
+      {
+        "chord": "C",
+        "mode": "G Natural Major",
+        "step": 4,
+      },
+      {
+        "chord": "C",
+        "mode": "F Natural Major",
+        "step": 5,
+      },
+      {
+        "chord": "Cm",
+        "mode": "C Natural Minor",
+        "step": 1,
+      },
+      {
+        "chord": "Eb",
+        "mode": "C Natural Minor",
+        "step": 3,
+      },
+      {
+        "chord": "Ab",
+        "mode": "C Natural Minor",
+        "step": 6,
+      },
+    ],
+  },
+  {
+    "from": {
+      "chord": "Gm7(♭5)",
+      "mode": "F Harmonic Minor",
+      "step": undefined,
+    },
+    "to": [
+      {
+        "chord": "Abaug",
+        "mode": "F Harmonic Minor",
+        "step": 3,
+      },
+      {
+        "chord": "Ab",
+        "mode": "Ab Harmonic Major",
+        "step": 1,
+      },
+      {
+        "chord": "Abm",
+        "mode": "Eb Harmonic Major",
+        "step": 4,
+      },
+      {
+        "chord": "Cbaug",
+        "mode": "Eb Harmonic Major",
+        "step": 6,
+      },
+      {
+        "chord": "Gbm",
+        "mode": "Db Harmonic Major",
+        "step": 4,
+      },
+      {
+        "chord": "Ab",
+        "mode": "Db Harmonic Major",
+        "step": 5,
+      },
+      {
+        "chord": "Ab",
+        "mode": "C Harmonic Minor",
+        "step": 6,
+      },
+      {
+        "chord": "Gb",
+        "mode": "Bb Harmonic Minor",
+        "step": 6,
+      },
+    ],
+  },
+]
+`;

@@ -37,9 +37,19 @@ test("Quality::isAugmented", () => {
   expect(Quality.fromAbbr("AA").isAugmented()).toBe(false);
 });
 
+test("Quality::isDoublyAugmented", () => {
+  expect(Quality.fromAbbr("A").isDoublyAugmented()).toBe(false);
+  expect(Quality.fromAbbr("AA").isDoublyAugmented()).toBe(true);
+});
+
 test("Quality::isDiminished", () => {
   expect(Quality.fromAbbr("d").isDiminished()).toBe(true);
   expect(Quality.fromAbbr("dd").isDiminished()).toBe(false);
+});
+
+test("Quality::isDoublyDiminished", () => {
+  expect(Quality.fromAbbr("d").isDoublyDiminished()).toBe(false);
+  expect(Quality.fromAbbr("dd").isDoublyDiminished()).toBe(true);
 });
 
 test("Quality::toAbbr", () => {

@@ -1,5 +1,6 @@
 import { Degree } from "./degree";
 import { Quality } from "./quality";
+import { Inter } from "./types";
 
 const intervalToSemitonesMap: Record<string, number> = {
   S1: 1, // only one semitone
@@ -79,10 +80,13 @@ export class Interval {
     const quality = Quality.fromAbbr(prefix);
 
     const n = Number(num);
-    const degree = Degree.fromNumber(n);
+    const degree = Degree.from(n);
 
     if (n === 8 && !quality.isPerfect()) {
       throw new Error("only perfect octave(P8) is valid");
+    }
+    if (quality.isPerfect() && ![1, 4, 5, 8].includes(n)) {
+      throw new Error("only P1/P8/P4/P5 is valid");
     }
     if (n === 4 || n === 5) {
       if (quality.isMajor() || quality.isMinor()) {
@@ -98,7 +102,6 @@ export class Interval {
     const abbr = degreeSemitonesCountToAbbr[key];
 
     if (!abbr) {
-      debugger;
       throw new Error(
         `cannot determine interval from degree = ${degree} and semitones = ${semitones}`
       );
@@ -107,15 +110,15 @@ export class Interval {
     return Interval.from(abbr);
   }
 
-  get quality() {
+  quality() {
     return this._quality;
   }
 
-  get degree() {
+  degree() {
     return this._degree;
   }
 
-  get semitones() {
+  semitones() {
     return intervalToSemitonesMap[this.toAbbr()]!;
   }
 
@@ -127,8 +130,7 @@ export class Interval {
   }
 
   isSemitone() {
-    const count = this.semitones;
-    return count === 1 || count === 11;
+    return this.semitones() === 1;
   }
 
   isMajor() {
@@ -147,17 +149,19 @@ export class Interval {
     return this._quality.isAugmented();
   }
 
+  isDoublyAugmented() {
+    return this._quality.isDoublyAugmented();
+  }
+
   isDiminished() {
     return this._quality.isDiminished();
+  }
+
+  isDoublyDiminished() {
+    return this._quality.isDoublyDiminished();
   }
 
   toAbbr() {
     return `${this._quality.toAbbr()}${this._degree.valueOf()}`;
   }
-
-  toString() {
-    return `${this._quality.toString()} ${this._degree.toString()}`;
-  }
 }
-
-export type Inter = string | Interval;

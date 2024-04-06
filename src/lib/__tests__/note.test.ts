@@ -1,5 +1,6 @@
 import { Interval } from "../interval";
-import { AccidentalEnum, Note, NoteEnum } from "../note";
+import { Note } from "../note";
+import { AccidentalEnum, NoteEnum } from "../types";
 
 test("Note::from", () => {
   expect(() => Note.from("")).toThrow("invalid abbr: ");

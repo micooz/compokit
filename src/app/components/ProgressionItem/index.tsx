@@ -31,7 +31,8 @@ export function ProgressionItem(props: ProgressionItemProps) {
   const { progression, showModeStepHint } = props;
   const { chords, arrangement } = progression;
 
-  const showHint = showModeStepHint && chords.every((chord) => !!chord.mode);
+  const showHint =
+    showModeStepHint && chords.every((chord) => !!chord.chord.mode());
 
   return (
     <div className="progressionItem overflow-auto select-none">
@@ -65,7 +66,8 @@ interface ModeStepHintProps {
 function ModeStepHint(props: ModeStepHintProps) {
   const { current, previous } = props;
 
-  const showMode = current.mode!.name() !== previous?.mode!.name();
+  const showMode =
+    current.chord.mode()!.name() !== previous?.chord.mode()!.name();
 
   return (
     <div
@@ -75,7 +77,7 @@ function ModeStepHint(props: ModeStepHintProps) {
     >
       {showMode && (
         <div className="ml-3 border-l-2 border-transparent">
-          {current.mode!.name({
+          {current.chord.mode()!.name({
             shortName: true,
             transformAccidental: true,
           })}
@@ -83,7 +85,7 @@ function ModeStepHint(props: ModeStepHintProps) {
       )}
       <div className="flex-1 flex justify-center items-center gap-2">
         {!showMode && <div className="pl-[29%] border-b border-gray-200 " />}
-        <div>{current.step}</div>
+        <div>{current.chord.step()}</div>
         <div className="flex-1 border-b border-gray-200" />
       </div>
     </div>

@@ -1,13 +1,14 @@
-import { Note, NoteIsOptions, NoteToNameOptions, Notes } from "./note";
+import { Mode } from "./mode";
+import { Note } from "./note";
 import { NoteArray } from "./note-array";
-
-export enum ChordTypeEnum {
-  Triad,
-  Seventh,
-  // Ninth,
-  // Eleventh,
-  // Thirteen,
-}
+import {
+  ChordIsOptions,
+  ChordJSON,
+  ChordTypeEnum,
+  NoteToNameOptions,
+  Notes,
+  ResolveToOptions,
+} from "./types";
 
 const chordQualityMap: Record<string, string> = {
   "m-m": "dim",
@@ -25,7 +26,7 @@ const chordQualityMap: Record<string, string> = {
   "M-M-M": "augM7",
 };
 
-const degreeSeqToInversionAndRootIndex: Record<string, [number, number]> = {
+const degreeSeqToInversionAndTonicIndex: Record<string, [number, number]> = {
   "3-3": [0, 0], // C E G
   "3-4": [1, 2], // E G C
   "4-3": [2, 1], // G C E
@@ -35,19 +36,20 @@ const degreeSeqToInversionAndRootIndex: Record<string, [number, number]> = {
   "2-3-3": [3, 1], // B C E G
 };
 
-export type ChordIsOptions = {
-  checkInversion?: boolean;
-  nodeIsOptions?: NoteIsOptions;
-};
-
 export class Chord {
+  private _mode?: Mode;
+
+  private _step?: number;
+
   private _noteArr: NoteArray;
 
-  private _root: Note;
+  private _tonic: Note;
 
   private _inversion = 0;
 
-  constructor(notes: Notes) {
+  constructor(notes: Notes, mode?: Mode, step?: number) {
+    this._mode = mode;
+    this._step = step;
     this._noteArr = new NoteArray(notes);
 
     // TODO: supports structures containing omitted and added notes
@@ -62,22 +64,22 @@ export class Chord {
     const intervals = dedup.intervals();
 
     // extract degrees
-    const degrees = intervals.map((inter) => inter.degree.valueOf());
+    const degrees = intervals.map((inter) => inter.degree().valueOf());
 
-    // determine inversion and root index
-    const [inversion, rootIndex] =
-      degreeSeqToInversionAndRootIndex[degrees.join("-")] || [];
+    // determine inversion and tonic index
+    const [inversion, tonicIndex] =
+      degreeSeqToInversionAndTonicIndex[degrees.join("-")] || [];
 
-    if (inversion === undefined || rootIndex === undefined) {
+    if (inversion === undefined || tonicIndex === undefined) {
       throw new Error(
         `cannot form a chord with these notes: ${this._noteArr.join()}`
       );
     }
 
-    // root note
-    const root = dedup.get(rootIndex)!;
+    // tonic note
+    const tonic = dedup.get(tonicIndex)!;
 
-    this._root = root;
+    this._tonic = tonic;
     this._inversion = inversion;
   }
 
@@ -85,55 +87,40 @@ export class Chord {
     return this._noteArr.intervals();
   }
 
-  // TODO: fromAbbr
-  fromAbbr(abbr: string) {
-    //
+  tonic() {
+    return this._tonic;
   }
 
-  inverse(ordinal = 1) {
-    const backward = ordinal < 0;
-    const notes = this._noteArr.clone().valueOf();
+  mode() {
+    return this._mode;
+  }
 
-    for (let n = 1; n <= Math.abs(ordinal); n += 1) {
-      if (backward) {
-        const last = notes.pop()!;
+  step() {
+    return this._step;
+  }
 
-        if (last.group) {
-          last.group -= 1;
-        }
+  // // TODO: fromAbbr
+  // static fromAbbr(abbr: string) {
+  //   //
+  // }
 
-        notes.unshift(last);
-      } else {
-        const first = notes.shift()!;
+  static fromJSON(json: ChordJSON) {
+    const { notes, mode, step } = json;
 
-        if (first.group) {
-          first.group += 1;
-        }
+    let _mode: Mode | undefined;
 
-        notes.push(first);
-      }
+    if (mode && mode.type !== undefined) {
+      _mode = Mode.from(mode.key, mode.type);
     }
 
-    return new Chord(notes);
-  }
-
-  inversion() {
-    return this._inversion;
-  }
-
-  rootPosition() {
-    if (this._inversion === 0) {
-      return this.clone();
-    }
-
-    return this.inverse(-this._inversion);
+    return new Chord(notes, _mode, step);
   }
 
   toAbbr(opts?: NoteToNameOptions) {
     const first = this._noteArr.get(0)!.name(opts);
 
     // C
-    const root = this._root.name(opts);
+    const tonic = this._tonic.name(opts);
 
     // chord in root position
     const inRootPosition = this.inverse(-this._inversion);
@@ -163,7 +150,7 @@ export class Chord {
 
     if (quality === undefined) {
       throw new Error(
-        `unable to determine the appropriate chord representation for: ${this.join()}`
+        `unable to determine the appropriate chord representation for: ${this.notes().join()}`
       );
     }
 
@@ -173,24 +160,54 @@ export class Chord {
     // /G
     let by = "";
 
-    if (root !== first) {
+    if (tonic !== first) {
       by = `/${first}`;
     }
 
     // CmM7/G
-    return `${root}${quality}${accidentals}${by}`;
+    return `${tonic}${quality}${accidentals}${by}`;
+  }
+
+  inverse(ordinal = 1) {
+    const backward = ordinal < 0;
+    const notes = this._noteArr.clone().valueOf();
+
+    for (let n = 1; n <= Math.abs(ordinal); n += 1) {
+      if (backward) {
+        const last = notes.pop()!;
+
+        if (last.group) {
+          last.group -= 1;
+        }
+
+        notes.unshift(last);
+      } else {
+        const first = notes.shift()!;
+
+        if (first.group) {
+          first.group += 1;
+        }
+
+        notes.push(first);
+      }
+    }
+
+    return new Chord(notes, this._mode, this._step);
+  }
+
+  inversion() {
+    return this._inversion;
+  }
+
+  rootPosition() {
+    if (this._inversion === 0) {
+      return this.clone();
+    }
+    return this.inverse(-this._inversion);
   }
 
   notes() {
     return this._noteArr;
-  }
-
-  noteNames(opts?: NoteToNameOptions) {
-    return this._noteArr.names(opts);
-  }
-
-  join(separator = " ", opts?: NoteToNameOptions) {
-    return this._noteArr.join(separator, opts);
   }
 
   is(chord: Chord, opts?: ChordIsOptions) {
@@ -206,13 +223,81 @@ export class Chord {
       return false;
     }
 
-    return notesA.valueOf().every((noteA, index) => {
-      const noteB = notesB.get(index)!;
-      return noteA.is(noteB, opts?.nodeIsOptions);
-    });
+    for (const note of notesA.valueOf()) {
+      if (!notesB.includes(note, nodeIsOptions)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  resolveTo(opts: ResolveToOptions) {
+    const { algorithm } = opts;
+
+    if (algorithm === "closely-related-modes") {
+      if (!this._mode) {
+        throw new Error("this chord is not associated with a mode");
+      }
+
+      const modes = [
+        this._mode,
+        this._mode.relative(),
+        this._mode.relative().dominant(),
+        this._mode.relative().subDominant(),
+        this._mode.dominant(),
+        this._mode.subDominant(),
+        this._mode.parallel(),
+      ];
+
+      const currentNotes = this._noteArr.valueOf();
+
+      // get all chords
+      const chords: Chord[] = modes
+        .map((mode) => mode.chords(ChordTypeEnum.Triad))
+        .flat();
+
+      const possibles: typeof chords = [];
+
+      // compare each chord
+      for (const chord of chords) {
+        // skip the same chord
+        if (this.is(chord)) {
+          continue;
+        }
+
+        for (const note of currentNotes) {
+          const tonic = chord.tonic();
+
+          // should resolved to tonic
+          if (!note.to(tonic).is("m2")) {
+            continue;
+          }
+
+          possibles.push(chord);
+        }
+      }
+
+      return possibles;
+    }
+
+    return [];
   }
 
   clone() {
-    return new Chord(this._noteArr.valueOf());
+    return new Chord(this._noteArr.valueOf(), this._mode, this._step);
+  }
+
+  toJSON() {
+    const json: ChordJSON = { notes: this._noteArr.names() };
+
+    if (this._mode) {
+      json.mode = { key: this._mode.key().name(), type: this._mode.type() };
+    }
+    if (this._step) {
+      json.step = this._step;
+    }
+
+    return json;
   }
 }

@@ -1,12 +1,7 @@
-import { dedupBy } from "./common";
+import { dedupBy } from "./utils";
 import { Interval } from "./interval";
-import {
-  Note,
-  NoteIsOptions,
-  NoteToNameOptions,
-  NoteType,
-  Notes,
-} from "./note";
+import { Note } from "./note";
+import { NoteIsOptions, NoteToNameOptions, NoteType, Notes } from "./types";
 
 export type WithGroupOptions = {
   // autoGroup?: boolean;
@@ -18,18 +13,15 @@ export type WithGroupOptions = {
 export class NoteArray {
   private _notes: Note[] = [];
 
-  constructor(notes: Notes) {
-    const count = notes instanceof NoteArray ? notes.count() : notes.length;
-    const first = notes instanceof NoteArray ? notes.get(0) : notes[0];
-
-    if (count === 0) {
-      this._notes = [];
-    }
-    if (typeof first === "string") {
-      this._notes = (notes as string[]).map((note) => Note.from(note));
-    }
-    if (first instanceof Note) {
-      this._notes = (notes as Note[]).map((note) => note.clone());
+  constructor(src: Notes) {
+    if (src instanceof NoteArray) {
+      this._notes = src.valueOf().map((note) => note.clone());
+    } else if (src.length !== 0) {
+      if (typeof src[0] === "string") {
+        this._notes = (src as string[]).map((note) => Note.from(note));
+      } else {
+        this._notes = (src as Note[]).map((note) => note.clone());
+      }
     }
   }
 

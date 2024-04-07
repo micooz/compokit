@@ -84,15 +84,15 @@ function ModeStepHint(props: ModeStepHintProps) {
       )}
     >
       {showMode && (
-        <div className="ml-3 border-l-2 border-transparent">
+        <TextBeauty className="ml-3 border-l-2 border-transparent">
           {current.chord.mode()!.name({
             shortName: true,
             transformAccidental: true,
           })}
-        </div>
+        </TextBeauty>
       )}
       <div className="flex-1 flex justify-center items-center gap-2">
-        {!showMode && <div className="pl-[29%] border-b border-gray-200 " />}
+        {!showMode && <div className="pl-[29%] border-b border-gray-200" />}
         <div>{current.chord.step()}</div>
         <div className="flex-1 border-b border-gray-200" />
       </div>

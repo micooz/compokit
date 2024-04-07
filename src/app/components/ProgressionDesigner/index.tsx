@@ -348,6 +348,8 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
   }
 
   function onInsertChord(index: number, chord: Chord) {
+    clearSelection();
+
     currentProgression.insertIndex = index;
     onAddOrReplaceChord(chord);
   }

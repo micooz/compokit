@@ -1,21 +1,28 @@
 "use client";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { RefObject, useEffect, useMemo, useRef } from "react";
 import classNames from "classnames";
+import { useReactive } from "ahooks";
 import { Checkbox } from "primereact/checkbox";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 
-import { Note } from "@/lib";
+import { Note, Chord as ChordType } from "@/lib";
 import { PercussionPad } from "@/components/PercussionPad";
-import { PianoKeyboardRef } from "@/components/PianoKeyboard";
+import { PianoKeyboard, PianoKeyboardRef } from "@/components/PianoKeyboard";
 import { TextBeauty } from "@/components/TextBeauty";
 import { TouchEvent } from "@/components/TouchEvent";
 
 import { ChordItem, ProgressionVO } from "../ProgressionDesigner/share";
+import { ChordPad } from "../ChordPad";
+import { NoteList } from "../NoteList";
+
 import "./index.scss";
 
 export interface ProgressionItemProps {
   id: number;
   progression: ProgressionVO;
-  pianoRef: React.RefObject<PianoKeyboardRef>;
+  pianoRef: RefObject<PianoKeyboardRef>;
   disabled?: boolean;
   showModeStepHint?: boolean;
   showChordTransformTools?: boolean;
@@ -23,7 +30,8 @@ export interface ProgressionItemProps {
   onToggleOmitNote: (index: number, note: Note, omit: boolean) => void;
   onToggleOctaveChord: (index: number, octave: 0 | 8 | -8) => void;
   onToggleSelectChord: (index: number, selected: boolean) => void;
-  onInsertChord: (index: number) => void;
+  onInsertChord: (index: number, chord: ChordType) => void;
+  onInsertChordAt: (index: number) => void;
   onRemoveChord: (index: number) => void;
 }
 
@@ -108,6 +116,7 @@ function Chord(props: ChordProps) {
     disabled,
     showChordTransformTools,
     onInvertChord,
+    onInsertChordAt,
     onToggleOmitNote,
     onToggleOctaveChord,
     onToggleSelectChord,
@@ -123,7 +132,12 @@ function Chord(props: ChordProps) {
 
   const notes = current.chord.notes().valueOf();
 
+  const state = useReactive({
+    showPredictionDialog: false,
+  });
+
   const domRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<OverlayPanel>(null);
 
   const notesForPad = useMemo(() => {
     return chord
@@ -281,7 +295,7 @@ function Chord(props: ChordProps) {
       <div>
         <i
           className={classNames(
-            "fa-solid fa-add mt-5 mx-1 p-1 text-sm border",
+            "fa-solid fa-add mt-5 mx-1 p-1 text-sm border-2",
             "cursor-pointer text-gray-300 hover:text-gray-500",
             {
               "border-transparent": progression.insertIndex !== index,
@@ -289,7 +303,161 @@ function Chord(props: ChordProps) {
                 progression.insertIndex === index,
             }
           )}
-          onClick={() => onInsertChord(index)}
+          onClick={(e) => {
+            overlayRef.current?.toggle(e);
+          }}
+        />
+
+        <OverlayPanel ref={overlayRef}>
+          <div className="flex flex-col gap-2">
+            <Button
+              label="From Prediction"
+              icon="fa-solid fa-wand-magic-sparkles"
+              outlined
+              disabled={!chord.mode()?.isMajorMinor()}
+              onClick={() => {
+                state.showPredictionDialog = true;
+              }}
+            />
+            <Button
+              label="From Table"
+              icon="pi pi-table"
+              outlined
+              onClick={() => {
+                onInsertChordAt(index);
+                overlayRef.current?.hide();
+              }}
+            />
+          </div>
+        </OverlayPanel>
+
+        <Dialog
+          header="Select Chord"
+          breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+          blockScroll
+          visible={state.showPredictionDialog}
+          onHide={() => (state.showPredictionDialog = false)}
+        >
+          <ChordPredictionTable
+            chord={chord.inverse(inversion)}
+            onSelect={(chord) => {
+              onInsertChord(index, chord);
+              state.showPredictionDialog = false;
+            }}
+          />
+        </Dialog>
+      </div>
+    </div>
+  );
+}
+
+interface ChordPredictionTableProps {
+  chord: ChordType;
+  onSelect: (chord: ChordType) => void;
+}
+
+function ChordPredictionTable(props: ChordPredictionTableProps) {
+  const { chord, onSelect } = props;
+
+  const state = useReactive({
+    selectedIndex: -1,
+  });
+
+  const pianoRef = useRef<PianoKeyboardRef>(null);
+
+  const chords = useMemo(() => {
+    return chord.resolveTo({ algorithm: "closely-related-modes" });
+  }, [chord]);
+
+  function onChoose(index: number) {
+    state.selectedIndex = index === state.selectedIndex ? -1 : index;
+  }
+
+  function onConfirm() {
+    if (state.selectedIndex === -1) {
+      return;
+    }
+    onSelect(chords[state.selectedIndex]);
+  }
+
+  return (
+    <div className="chordTable">
+      {/* keyboard */}
+      <PianoKeyboard
+        ref={pianoRef}
+        className="my-3 w-full border-2 border-transparent"
+        startNote="C3"
+        endNote="B4"
+        showLabelFor={["c", "blacks"]}
+        showHighlightNotesHint
+      />
+
+      {/* hint */}
+      <div className="flex items-center gap-1 mb-4 text-sm">
+        <span>Select a chord followed by:</span>
+        <ChordPad
+          className="border-2 border-[#3576cb]"
+          chord={chord}
+          pianoRef={pianoRef}
+        />
+      </div>
+
+      {/* table */}
+      <div className="text-sm  overflow-auto">
+        <table>
+          <thead>
+            <tr>
+              <th style={{}}></th>
+              <th style={{ width: 160 }}>Mode</th>
+              <th style={{ width: 70 }}>Step</th>
+              <th style={{ width: 100 }}>Chord</th>
+              <th style={{ width: 230 }}>Pitches</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chords.map((chord, index) => (
+              <tr key={index} className="hover:bg-gray-100">
+                <td className="cursor-pointer" onClick={() => onChoose(index)}>
+                  <Checkbox
+                    className="block"
+                    checked={state.selectedIndex === index}
+                  />
+                </td>
+                <td
+                  className="px-2 cursor-pointer"
+                  onClick={() => onChoose(index)}
+                >
+                  <TextBeauty>
+                    {chord.mode()!.name({ transformAccidental: true })}
+                  </TextBeauty>
+                </td>
+                <td
+                  className="px-2 cursor-pointer"
+                  onClick={() => onChoose(index)}
+                >
+                  {chord.step()}
+                </td>
+                <td className="">
+                  <ChordPad chord={chord} pianoRef={pianoRef} />
+                </td>
+                <td className="px-1">
+                  <NoteList notes={chord.notes()} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* button */}
+      <div className="flex justify-end mt-4">
+        <Button
+          label="Add"
+          size="small"
+          icon="fa-solid fa-wand-magic-sparkles"
+          className="px-4"
+          disabled={state.selectedIndex === -1}
+          onClick={onConfirm}
         />
       </div>
     </div>

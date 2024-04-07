@@ -52,6 +52,37 @@ test("Mode:getKeys", () => {
     Mode.getKeys(ModeEnum.NaturalMajor).names({ transformAccidental: true })
   ).toMatchSnapshot();
   expect(() => Mode.getKeys(-1 as any)).toThrow("unknown mode: -1");
+
+  expect(Mode.getKeys(ModeEnum.NaturalMajor).names()).toEqual([
+    "C",
+    "Db",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "Gb",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ]);
+
+  expect(Mode.getKeys(ModeEnum.HarmonicMinor).names()).toEqual([
+    "C",
+    "C#",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ]);
 });
 
 test("Mode:key", () => {
@@ -153,35 +184,12 @@ test("Mode::notes", () => {
   expect(mode.notes().join()).toBe("C Eb");
 });
 
-test("getKeys", () => {
-  expect(Mode.getKeys(ModeEnum.NaturalMajor).names()).toEqual([
-    "C",
-    "Db",
-    "D",
-    "Eb",
-    "E",
-    "F",
-    "F#",
-    "Gb",
-    "G",
-    "Ab",
-    "A",
-    "Bb",
-    "B",
-  ]);
+test("Mode::clone", () => {
+  const mode = new Mode([Note.from("C"), Note.from("Eb")]);
+  expect(mode.clone().notes().join()).toBe("C Eb");
+});
 
-  expect(Mode.getKeys(ModeEnum.HarmonicMinor).names()).toEqual([
-    "C",
-    "C#",
-    "D",
-    "Eb",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "Ab",
-    "A",
-    "Bb",
-    "B",
-  ]);
+test("Mode::isMajorMinor", () => {
+  const mode = Mode.from("C", ModeEnum.Aeolian);
+  expect(mode.isMajorMinor()).toBe(false);
 });

@@ -298,6 +298,10 @@ export class Mode {
     return new Mode(this._noteArr.clone(), this._mode);
   }
 
+  isMajorMinor() {
+    return this.isMajor() || this.isMinor();
+  }
+
   private isMajor() {
     return (
       typeof this._mode !== "undefined" &&

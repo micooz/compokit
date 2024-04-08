@@ -415,7 +415,7 @@ function ChordPredictionTable(props: ChordPredictionTableProps) {
             </tr>
           </thead>
           <tbody>
-            {chords.map((chord, index) => (
+            {chords.map((item, index) => (
               <tr key={index} className="hover:bg-gray-100">
                 <td className="cursor-pointer" onClick={() => onChoose(index)}>
                   <Checkbox
@@ -424,24 +424,26 @@ function ChordPredictionTable(props: ChordPredictionTableProps) {
                   />
                 </td>
                 <td
-                  className="px-2 cursor-pointer"
+                  className={classNames("px-2 cursor-pointer", {
+                    "font-bold": chord.mode()!.is(item.mode()!),
+                  })}
                   onClick={() => onChoose(index)}
                 >
                   <TextBeauty>
-                    {chord.mode()!.name({ transformAccidental: true })}
+                    {item.mode()!.name({ transformAccidental: true })}
                   </TextBeauty>
                 </td>
                 <td
                   className="px-2 cursor-pointer"
                   onClick={() => onChoose(index)}
                 >
-                  {chord.step()}
+                  {item.step()}
                 </td>
                 <td className="">
-                  <ChordPad chord={chord} pianoRef={pianoRef} />
+                  <ChordPad chord={item} pianoRef={pianoRef} />
                 </td>
                 <td className="px-1">
-                  <NoteList notes={chord.notes()} />
+                  <NoteList notes={item.notes()} />
                 </td>
               </tr>
             ))}

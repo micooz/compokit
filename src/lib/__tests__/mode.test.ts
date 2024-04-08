@@ -189,6 +189,20 @@ test("Mode::clone", () => {
   expect(mode.clone().notes().join()).toBe("C Eb");
 });
 
+test("Mode::is", () => {
+  expect(
+    Mode.from("C", ModeEnum.Aeolian).is(Mode.from("C", ModeEnum.Dorian))
+  ).toBe(false);
+
+  expect(
+    Mode.from("C", ModeEnum.Aeolian).is(Mode.from("D", ModeEnum.Aeolian))
+  ).toBe(false);
+
+  expect(
+    Mode.from("C", ModeEnum.Aeolian).is(Mode.from("C", ModeEnum.Aeolian))
+  ).toBe(true);
+});
+
 test("Mode::isMajorMinor", () => {
   const mode = Mode.from("C", ModeEnum.Aeolian);
   expect(mode.isMajorMinor()).toBe(false);

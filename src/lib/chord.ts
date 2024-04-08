@@ -250,14 +250,12 @@ export class Chord {
         this._mode.parallel(),
       ];
 
-      const currentNotes = this._noteArr.valueOf();
-
       // get all chords
-      const chords: Chord[] = modes
+      const chords = modes
         .map((mode) => mode.chords(ChordTypeEnum.Triad))
         .flat();
 
-      const possibles: typeof chords = [];
+      const possibles: Chord[] = [];
 
       // compare each chord
       for (const chord of chords) {
@@ -266,15 +264,14 @@ export class Chord {
           continue;
         }
 
-        for (const note of currentNotes) {
-          const tonic = chord.tonic();
+        const tonic = chord.tonic();
 
+        for (const note of this._noteArr.valueOf()) {
           // should resolved to tonic
-          if (!note.to(tonic).is("m2")) {
-            continue;
+          if (note.to(tonic).is("m2")) {
+            possibles.push(chord);
+            break;
           }
-
-          possibles.push(chord);
         }
       }
 

@@ -11,9 +11,6 @@ import "primereact/resources/themes/nano/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
-import "@fortawesome/fontawesome-free/css/fontawesome.min.css";
-import "@fortawesome/fontawesome-free/css/solid.min.css";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

@@ -6,6 +6,10 @@ import { Checkbox } from "primereact/checkbox";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { LuRepeat } from "react-icons/lu";
+import { MdAdd } from "react-icons/md";
+import { FaWandMagicSparkles } from "react-icons/fa6";
+import { FaTableList } from "react-icons/fa6";
 
 import { Note, Chord as ChordType } from "@/lib";
 import { PercussionPad } from "@/components/PercussionPad";
@@ -241,11 +245,9 @@ function Chord(props: ChordProps) {
                   )}
                   onClick={() => onInvertChord(index)}
                 >
-                  <i
-                    className={classNames(
-                      "fa-solid fa-repeat relative top-[1px]"
-                    )}
-                    style={{ fontSize: "0.7rem" }}
+                  <LuRepeat
+                    className={classNames("relative top-[1px]")}
+                    size="0.8rem"
                   />
                   {inversion}
                 </div>
@@ -293,9 +295,9 @@ function Chord(props: ChordProps) {
 
       {/* insert icon */}
       <div>
-        <i
+        <div
           className={classNames(
-            "fa-solid fa-add mt-5 mx-1 p-1 text-sm border-2",
+            "mt-5 mx-1 text-sm border-2",
             "cursor-pointer text-gray-300 hover:text-gray-500",
             {
               "border-transparent": progression.insertIndex !== index,
@@ -306,13 +308,15 @@ function Chord(props: ChordProps) {
           onClick={(e) => {
             overlayRef.current?.toggle(e);
           }}
-        />
+        >
+          <MdAdd size="1.2rem" />
+        </div>
 
         <OverlayPanel ref={overlayRef}>
           <div className="flex flex-col gap-2">
             <Button
               label="From Prediction"
-              icon="fa-solid fa-wand-magic-sparkles"
+              icon={<FaWandMagicSparkles className="mr-3" />}
               outlined
               disabled={!chord.mode()?.isMajorMinor()}
               onClick={() => {
@@ -321,7 +325,7 @@ function Chord(props: ChordProps) {
             />
             <Button
               label="From Table"
-              icon="pi pi-table"
+              icon={<FaTableList />}
               outlined
               onClick={() => {
                 onInsertChordAt(index);
@@ -454,9 +458,9 @@ function ChordPredictionTable(props: ChordPredictionTableProps) {
       {/* button */}
       <div className="flex justify-end mt-4">
         <Button
-          label="Add"
+          label="Add Chord"
           size="small"
-          icon="fa-solid fa-wand-magic-sparkles"
+          icon={<FaWandMagicSparkles className="mr-2" />}
           className="px-4"
           disabled={state.selectedIndex === -1}
           onClick={onConfirm}

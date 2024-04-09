@@ -8,6 +8,7 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { Skeleton } from "primereact/skeleton";
+import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 
 import { Chord, Mode, Note, NoteArray } from "@/lib";
 import { ee } from "@/utils/ee";
@@ -232,7 +233,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
     confirmDialog({
       header: "Change Name",
-      icon: <i className="fa-solid fa-pencil" style={{ fontSize: "1.4rem" }} />,
+      icon: <MdOutlineDriveFileRenameOutline size="1.4rem" />,
       message: (
         <div className="my-2">
           <InputText

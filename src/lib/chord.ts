@@ -41,7 +41,7 @@ export class Chord {
 
   private _step?: number;
 
-  private _noteArr: NoteArray;
+  private _tones: NoteArray;
 
   private _tonic: Note;
 
@@ -50,15 +50,15 @@ export class Chord {
   constructor(notes: Notes, mode?: Mode, step?: number) {
     this._mode = mode;
     this._step = step;
-    this._noteArr = new NoteArray(notes);
+    this._tones = new NoteArray(notes);
 
     // TODO: supports structures containing omitted and added notes
-    if (this._noteArr.count() < 3) {
+    if (this._tones.count() < 3) {
       throw new Error("chord must contain at least three note");
     }
 
     // dedup
-    const dedup = this._noteArr.dedup();
+    const dedup = this._tones.dedup();
 
     // intervals in pairs
     const intervals = dedup.intervals();
@@ -72,7 +72,7 @@ export class Chord {
 
     if (inversion === undefined || tonicIndex === undefined) {
       throw new Error(
-        `cannot form a chord with these notes: ${this._noteArr.join()}`
+        `cannot form a chord with these notes: ${this._tones.join()}`
       );
     }
 
@@ -84,7 +84,7 @@ export class Chord {
   }
 
   private intervals() {
-    return this._noteArr.intervals();
+    return this._tones.intervals();
   }
 
   tonic() {
@@ -117,7 +117,7 @@ export class Chord {
   }
 
   toAbbr(opts?: NoteToNameOptions) {
-    const first = this._noteArr.get(0)!.name(opts);
+    const first = this._tones.get(0)!.name(opts);
 
     // C
     const tonic = this._tonic.name(opts);
@@ -170,7 +170,7 @@ export class Chord {
 
   inverse(ordinal = 1) {
     const backward = ordinal < 0;
-    const notes = this._noteArr.clone().valueOf();
+    const notes = this._tones.clone().valueOf();
 
     for (let n = 1; n <= Math.abs(ordinal); n += 1) {
       if (backward) {
@@ -207,7 +207,7 @@ export class Chord {
   }
 
   notes() {
-    return this._noteArr;
+    return this._tones;
   }
 
   is(chord: Chord, opts?: ChordIsOptions) {
@@ -266,7 +266,7 @@ export class Chord {
 
         const tonic = chord.tonic();
 
-        for (const note of this._noteArr.valueOf()) {
+        for (const note of this._tones.valueOf()) {
           // should resolved to tonic
           if (note.to(tonic).is("m2")) {
             possibles.push(chord);
@@ -282,11 +282,11 @@ export class Chord {
   }
 
   clone() {
-    return new Chord(this._noteArr.valueOf(), this._mode, this._step);
+    return new Chord(this._tones.valueOf(), this._mode, this._step);
   }
 
   toJSON() {
-    const json: ChordJSON = { notes: this._noteArr.names() };
+    const json: ChordJSON = { notes: this._tones.names() };
 
     if (this._mode) {
       json.mode = { key: this._mode.key().name(), type: this._mode.type() };

@@ -138,6 +138,20 @@ export class NoteArray {
     return false;
   }
 
+  is(arr: NoteArray, opts?: NoteIsOptions) {
+    if (this.count() !== arr.count()) {
+      return false;
+    }
+
+    for (let i = 0; i < this.count(); i += 1) {
+      if (!this.get(i)?.is(arr.get(i)!, opts)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   private forPair(func: (prev: Note, next: Note) => void) {
     return this._notes.reduce((prev, next) => {
       func(prev, next);

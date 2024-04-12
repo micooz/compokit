@@ -1,15 +1,16 @@
 "use client";
 import React, { useMemo, useRef } from "react";
 import classNames from "classnames";
+import { useReactive } from "ahooks";
 
 import { Chord, ChordTypeEnum, Mode } from "@/lib";
 import { ee } from "@/utils/ee";
 import { PianoKeyboard, PianoKeyboardRef } from "@/components/PianoKeyboard";
-import { PercussionPad } from "@/components/PercussionPad";
 import { TextBeauty } from "@/components/TextBeauty";
 import { TouchEvent } from "@/components/TouchEvent";
 
-import { NoteItem } from "../NoteItem";
+import { ChordPad } from "../ChordPad";
+import { NoteList } from "../NoteList";
 
 import "./index.scss";
 
@@ -21,6 +22,11 @@ export interface ChordTableProps {
 
 export function ChordTable(props: ChordTableProps) {
   const { mode, selectedChord, onRemove } = props;
+
+  const state = useReactive({
+    isInserting: false,
+    isSelected: false,
+  });
 
   const pianoRef = useRef<PianoKeyboardRef>(null);
 
@@ -53,6 +59,16 @@ export function ChordTable(props: ChordTableProps) {
     return notes.map((note) => note.nameWithGroup());
   }, [mode]);
 
+  // events
+
+  ee.useEvent("INSERT_CHORD", (insert) => {
+    state.isInserting = insert;
+  });
+
+  ee.useEvent("SELECT_CHORD", (selected) => {
+    state.isSelected = !!selected;
+  });
+
   // methods
 
   async function onPlayScale() {
@@ -67,23 +83,14 @@ export function ChordTable(props: ChordTableProps) {
     await pianoRef.current.attackOneByOne(reversedModeKeys, 200);
   }
 
-  function onAddChord(chord: Chord, step: number) {
-    ee.emit("ADD_CHORD", { chord, step, mode: mode.clone() });
+  function onAddChord(chord: Chord) {
+    ee.emit("ADD_CHORD", chord);
   }
 
   // components
 
   function ModeTitle() {
     const name = mode.name({ transformAccidental: true });
-    const notes = mode
-      .notes()
-      .names({ transformAccidental: true })
-      .map((name, index, arr) => (
-        <React.Fragment key={index}>
-          <NoteItem>{name}</NoteItem>
-          {index !== arr.length - 1 && ","}
-        </React.Fragment>
-      ));
 
     return (
       <div className="flex flex-col justify-between pb-2">
@@ -94,7 +101,9 @@ export function ChordTable(props: ChordTableProps) {
                 className="dragHandle pi pi-bars cursor-grab mr-3"
                 style={{ fontSize: "1rem" }}
               />
-              <TextBeauty className="text-base text-nowrap font-semibold">{name}</TextBeauty>
+              <TextBeauty className="text-base text-nowrap font-semibold">
+                {name}
+              </TextBeauty>
             </div>
             <i
               className="pi pi-trash cursor-pointer"
@@ -109,44 +118,44 @@ export function ChordTable(props: ChordTableProps) {
               style={{ fontSize: "0.8rem" }}
               onClick={onPlayScale}
             />
-            <div className="text-sm font-normal text-nowrap">{notes}</div>
+            <NoteList
+              className="text-sm font-normal text-nowrap"
+              notes={mode.notes()}
+            />
           </div>
         </div>
       </div>
     );
   }
 
-  function ChordItem(props: { chord: Chord; step: number }) {
-    const { chord, step } = props;
-
-    const abbr = chord.toAbbr({ transformAccidental: true });
-    const notes = useMemo(() => chord.notes().withGroup(3).names(), [chord]);
-
+  function ChordItem(props: { chord: Chord }) {
+    const { chord } = props;
     const showCloneIcon = !!selectedChord; // || insertChord;
 
     return (
-      <PercussionPad
-        className={classNames("px-2 py-1 flex items-center justify-between", {
-          "bg-blue-300": selectedChord?.is(chord),
-        })}
-        notes={notes}
+      <ChordPad
+        chord={chord}
         pianoRef={pianoRef}
-      >
-        <div className="inline-block px-1 border border-transparent">
-          <TextBeauty>{abbr}</TextBeauty>
-        </div>
-        <TouchEvent onTouchStart={() => onAddChord(chord, step)}>
-          <i
-            className={classNames("p-1 hover:bg-gray-300 active:bg-gray-400", {
-              "pi pi-clone": showCloneIcon,
-              "pi pi-plus": !showCloneIcon,
-            })}
-            style={{ fontSize: "0.8rem" }}
-          />
-        </TouchEvent>
-      </PercussionPad>
+        active={selectedChord?.is(chord)}
+        extra={
+          <TouchEvent onTouchStart={() => onAddChord(chord)}>
+            <i
+              className={classNames(
+                "p-1 hover:bg-gray-300 active:bg-gray-400",
+                {
+                  "pi pi-clone": showCloneIcon,
+                  "pi pi-plus": !showCloneIcon,
+                }
+              )}
+              style={{ fontSize: "0.8rem" }}
+            />
+          </TouchEvent>
+        }
+      />
     );
   }
+
+  const isTableHighlight = state.isInserting || state.isSelected;
 
   return (
     <div className="chordTable relative select-none overflow-auto p-4 border shadow-sm">
@@ -156,7 +165,7 @@ export function ChordTable(props: ChordTableProps) {
       {/* keyboard */}
       <PianoKeyboard
         ref={pianoRef}
-        className="mb-3 w-full"
+        className="mb-3 w-full border-2 border-transparent"
         startNote="C3"
         endNote="B4"
         showLabelFor={["c"]}
@@ -165,7 +174,12 @@ export function ChordTable(props: ChordTableProps) {
       />
 
       {/* table */}
-      <div className="overflow-auto">
+      <div
+        className={classNames("overflow-auto border-2", {
+          "border-orange-400": isTableHighlight,
+          "border-transparent": !isTableHighlight,
+        })}
+      >
         <table className="text-sm">
           <thead>
             <tr>
@@ -179,24 +193,14 @@ export function ChordTable(props: ChordTableProps) {
             {rows.map((item) => (
               <tr key={item.step}>
                 <td className="">{item.step}</td>
-                <td className="hover:bg-gray-100 cursor-pointer">
-                  <ChordItem chord={item.triad} step={item.step} />
+                <td className="">
+                  <ChordItem chord={item.triad} />
                 </td>
-                <td className="hover:bg-gray-100 cursor-pointer">
-                  <ChordItem chord={item.seventh} step={item.step} />
+                <td className="">
+                  <ChordItem chord={item.seventh} />
                 </td>
                 <td className="px-2">
-                  {item.seventh
-                    .notes()
-                    .valueOf()
-                    .map((note, index, arr) => (
-                      <React.Fragment key={index}>
-                        <NoteItem>
-                          {note.name({ transformAccidental: true })}
-                        </NoteItem>
-                        {index !== arr.length - 1 && ","}
-                      </React.Fragment>
-                    ))}
+                  <NoteList notes={item.seventh.notes()} />
                 </td>
               </tr>
             ))}

@@ -8,6 +8,7 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { Skeleton } from "primereact/skeleton";
+import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 
 import { Chord, Mode, Note, NoteArray } from "@/lib";
 import { ee } from "@/utils/ee";
@@ -108,6 +109,20 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     }));
   }
 
+  function clearSelection() {
+    state.list.forEach((progression) => {
+      // clear insert index
+      progression.insertIndex = -1;
+      // clear all checkbox
+      progression.chords.forEach((chord) => {
+        chord.selected = false;
+      });
+    });
+
+    ee.emit("SELECT_CHORD", undefined);
+    ee.emit("INSERT_CHORD", false);
+  }
+
   async function playChord(chord: ChordItem, duration = 600) {
     if (!pianoRef.current) {
       return;
@@ -145,6 +160,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     }
     state.current = index;
     storage.currentProgressionIndex = index;
+    clearSelection();
   }
 
   function onAddProgression() {
@@ -195,6 +211,10 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       accept: () => {
         state.list = state.list.filter((_, idx) => idx !== index);
         state.current = Math.max(0, index - 1);
+
+        ee.emit("SELECT_CHORD", undefined);
+        ee.emit("INSERT_CHORD", false);
+
         save();
       },
     });
@@ -213,7 +233,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
 
     confirmDialog({
       header: "Change Name",
-      icon: <i className="fa-solid fa-pencil" style={{ fontSize: "1.4rem" }} />,
+      icon: <MdOutlineDriveFileRenameOutline size="1.4rem" />,
       message: (
         <div className="my-2">
           <InputText
@@ -268,12 +288,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     state.isPlaying = { status: false, progression: null };
   }
 
-  function onAddOrReplaceChord(args: {
-    chord: Chord;
-    step: number;
-    mode: Mode;
-  }) {
-    const { chord, step, mode } = args;
+  function onAddOrReplaceChord(chord: Chord) {
     const currentProgression = state.list[state.current];
 
     if (!currentProgression) {
@@ -306,6 +321,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       // select it
       newChord.selected = true;
       ee.emit("SELECT_CHORD", newChord.chord);
+      ee.emit("INSERT_CHORD", false);
 
       // play it
       playChord(newChord);
@@ -323,6 +339,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     if (deleted[0].selected) {
       // clear select
       ee.emit("SELECT_CHORD", undefined);
+      ee.emit("INSERT_CHORD", false);
 
       // clear insert index
       currentProgression.insertIndex = -1;
@@ -331,21 +348,22 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
     save();
   }
 
-  function onInsertChord(index: number) {
+  function onInsertChord(index: number, chord: Chord) {
+    clearSelection();
+
+    currentProgression.insertIndex = index;
+    onAddOrReplaceChord(chord);
+  }
+
+  function onInsertChordAt(index: number) {
     const { insertIndex } = currentProgression;
 
-    // clear all checkbox
-    state.list.forEach((progression) => {
-      progression.chords.forEach((chord) => {
-        chord.selected = false;
-      });
-    });
+    clearSelection();
 
     const newIndex = insertIndex === index ? -1 : index;
-
     currentProgression.insertIndex = newIndex;
 
-    ee.emit("SELECT_CHORD", undefined);
+    ee.emit("INSERT_CHORD", newIndex !== -1);
   }
 
   function onInvertChord(index: number) {
@@ -405,15 +423,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
       return;
     }
 
-    // clear insert index
-    currentProgression.insertIndex = -1;
-
-    // clear all checkbox
-    state.list.forEach((progression) => {
-      progression.chords.forEach((chord) => {
-        chord.selected = false;
-      });
-    });
+    clearSelection();
 
     chord.selected = selected;
 
@@ -580,6 +590,7 @@ export function ProgressionDesigner(props: ProgressionDesignerProps) {
                   onToggleSelectChord={onToggleSelectChord}
                   onRemoveChord={onRemoveChord}
                   onInsertChord={onInsertChord}
+                  onInsertChordAt={onInsertChordAt}
                 />
               </AccordionTab>
             ))}

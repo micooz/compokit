@@ -94,3 +94,15 @@ test("NoteArray::include", () => {
     false
   );
 });
+
+test("NoteArray::is", () => {
+  expect(NoteArray.from(["C3"]).is(NoteArray.from(["C3", "D3"]))).toBe(false);
+
+  expect(NoteArray.from(["C3", "E3"]).is(NoteArray.from(["C3", "D3"]))).toBe(
+    false
+  );
+
+  expect(NoteArray.from(["C3", "D3"]).is(NoteArray.from(["C3", "D3"]))).toBe(
+    true
+  );
+});

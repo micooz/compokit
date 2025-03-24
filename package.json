@@ -30,7 +30,7 @@
     "react-sticky-box": "^2.0.5",
     "sortablejs": "^1.15.2",
     "store2": "^2.14.4",
-    "tone": "^14.7.77",
+    "tone": "14.7.77",
     "vexflow": "^4.2.3"
   },
   "devDependencies": {

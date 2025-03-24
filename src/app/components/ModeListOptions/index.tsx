@@ -97,13 +97,13 @@ export function ModeListOptions(props: ModeListOptionsProps) {
 
       {state.loaded && (
         <div className="p-input-icon-left max-sm:w-full">
-          <i className="pi pi-search" />
+          <i className="pi pi-search ml-1.5" />
           <InputText
             id="search-note-input"
             value={state.searchNote}
             onChange={onSearchNote}
             placeholder="Search pitch..."
-            className="p-inputtext-sm w-full"
+            className="p-inputtext-sm w-full pl-7"
             style={{ paddingRight: state.searchNote ? 16 : "auto" }}
           />
           {state.searchNote && (
